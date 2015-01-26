@@ -1,14 +1,13 @@
 #include "autoCurseMenu.h"
 #include <stdlib.h>
 
-#define HEIGHT 50
-#define WIDTH 40
-#define WIN_NUM 3
+#define WIN_NUM 4
 
 int main()
 {
     int c;
     WINDOW *win[WIN_NUM];
+    PANEL *panel[WIN_NUM];
 
     //initialize curses
     initscr();
@@ -21,18 +20,21 @@ int main()
     init_pair(1, COLOR_BLACK, COLOR_BLUE);
 
     wbkgd(stdscr, COLOR_PAIR(1));
-
-    //create window
-    initWindows(win, WIN_NUM);
     refresh();
-    refreshAllWindows(win, WIN_NUM);
 
+    //create windows
+    initWindows(win, WIN_NUM);
+
+    //set new windows to panels
+    initPanels(panel,win,WIN_NUM);
+    update_panels();
+    doupdate();
 
     //pause program
     c = getch();
 
     //clean up all curses items;
-    freeWindows(win, WIN_NUM);
+    freePanels(panel,win, WIN_NUM);
 
     refresh();
     endwin();

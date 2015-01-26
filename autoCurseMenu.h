@@ -9,6 +9,7 @@
 
 void initWindows(WINDOW ** win,int win_total);
 void initPanels(PANEL ** panel,WINDOW ** win, int win_total);
-void freeWindows(WINDOW ** win, win_total);
+void freeWindows(WINDOW ** win, int win_total);
 void freePanels(PANEL ** panel);
+void refreshAllWindows(WINDOW ** win, int win_total);
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);

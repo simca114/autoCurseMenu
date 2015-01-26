@@ -1,0 +1,21 @@
+=================================
+Planned features for Menu Library
+=================================
+
+------------
+Initial Plan
+------------
+
+1) Initiate windows with panels based on a single color scheme
+2) Create single selection menu to be initialized with inputted char**
+3) Add prompt box to appear to confirm selection
+
+----------------
+Planned features
+----------------
+
+- provide post selection instructions box option
+- have config file to configure color schemes
+- multiple selection menu
+- sub-menus
+- python script to generate base templates 

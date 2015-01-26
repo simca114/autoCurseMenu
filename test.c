@@ -3,7 +3,7 @@
 
 #define HEIGHT 50
 #define WIDTH 40
-#define WIN_NUM 2
+#define WIN_NUM 3
 
 int main()
 {

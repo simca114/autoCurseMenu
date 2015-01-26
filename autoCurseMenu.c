@@ -17,17 +17,17 @@ void initWindows(WINDOW ** win,int win_total)
 
     switch(win_total)
     {
-        case 2: //basic single menu window
+        case 3: //basic single menu window
         {
             //main menu drop-shadow
             win[0] = newwin(HEIGHT,WIDTH,CENTER_Y + 1,CENTER_X + 2);
-            wbkgd(win[1],COLOR_PAIR(2));
+            wbkgd(win[0],COLOR_PAIR(2));
             //main menu border
             win[1] = newwin(HEIGHT,WIDTH,CENTER_Y,CENTER_X);
             wbkgd(win[1],COLOR_PAIR(3));
             //main menu
-            //win[2] = newwin(HEIGHT - 2,WIDTH - 2,CENTER_Y,CENTER_X);
-            //wbkgd(win[2],COLOR_PAIR(4));
+            win[2] = newwin(HEIGHT - 6,WIDTH - 4,CENTER_Y + 3,CENTER_X + 2);
+            wbkgd(win[2],COLOR_PAIR(4));
             break;
         }
         default:

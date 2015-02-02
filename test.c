@@ -1,7 +1,7 @@
 #include "autoCurseMenu.h"
 #include <stdlib.h>
 
-#define WIN_NUM 4
+#define WIN_NUM 8
 
 int main()
 {
@@ -23,7 +23,12 @@ int main()
     refresh();
 
     //create windows
-    initWindows(win, WIN_NUM);
+    if(initWindows(win, WIN_NUM))
+    {
+        endwin();
+        printf("Could not initialize windows.\n");
+        exit(1);
+    }
 
     //set new windows to panels
     initPanels(panel,win,WIN_NUM);
@@ -33,13 +38,20 @@ int main()
     //pause program
     c = getch();
 
+    //show popup box
+
+    displayWindowSet(panel,1,true);
+    update_panels();
+    doupdate();
+
+    c = getch();
+    c = getch();
+
     //clean up all curses items;
     freePanels(panel,win, WIN_NUM);
 
     refresh();
     endwin();
-
-    system("clear");
 
     return 0;
 }

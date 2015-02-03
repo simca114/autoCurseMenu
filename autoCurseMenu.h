@@ -7,20 +7,45 @@
 #include <menu.h>
 #include <stdio.h>
 
+//functions to calculate windows
+int startY();
+int startX();
+int menuBoxHeight();
+int menuBoxWidth();
+int menuStartY();
+int menuStartX();
+int bottomMenu();
+int bottomMenuWidth();
+int bottomMenuStartX();
+int bottomMenuStartY();
+int popupHeight();
+int popupWidth();
+int popupStartY();
+int popupStartX();
+int popupMesgWidth();
+int popupMesgStartY();
+int popupMesgStartX();
+int popupMesgChoiceWidth();
+int popupMesgChoiceStartY();
+int popupMesgChoice1StartX();
+int popupMesgChoice2StartX();
+
 //functions for displaying and removing windows/panels
-void displayWindowSet(PANEL ** panel,int win_set, bool show);
-int initWindows(WINDOW ** win,int win_total);
+void displayPanelSet(PANEL ** panel, int panel_total, bool show);
+int initWindows(WINDOW ** win1,WINDOW ** win2);
 void initPanels(PANEL ** panel,WINDOW ** win, int win_total);
 void freeWindows(WINDOW ** win, int win_total);
 void freePanels(PANEL ** panel, WINDOW ** win, int win_total);
 void refreshAllWindows(WINDOW ** win, int win_total);
+void setPanelsPtr(PANEL * panel1, PANEL * panel2);
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
 //functions for creating and clearing menus
-void initMenu(MENU *menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
-void initItems(ITEM ** items,char ** menu_options,int num_options);
+void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
+void initItems(char * menu_options);
 void freeItems(ITEM ** items,int num_options);
 void freeMenu(MENU *menu,ITEM ** items,int num_options);
 
 //functions for menu interactions
+int mainMenu(char ** menu_options);
 int popupMenu(PANEL ** panel);

@@ -3,71 +3,126 @@
  */
 #include "autoCurseMenu.h"
 
+#define WIN_NUM_MAIN 4
+#define WIN_NUM_POPUP 5
+
 #define HEIGHT 20
 #define WIDTH 40
 
-#define START_Y ((LINES - HEIGHT) / 2)
-#define START_X ((COLS - WIDTH) / 2)
-
-#define MENU_BOX_HEIGHT (HEIGHT - 6)
-#define MENU_BOX_WIDTH (WIDTH - 4)
-#define MENU_START_Y ((LINES - MENU_BOX_HEIGHT) / 2)
-#define MENU_START_X ((COLS - MENU_BOX_WIDTH) / 2)
-
-#define BOTTOM_MENU ((MENU_START_Y + MENU_BOX_HEIGHT))
-
-//BOTTOM_MENU HEIGHT is set to 1
-#define BOTTOM_MENU_WIDTH (MENU_BOX_WIDTH / 4)
-#define BOTTOM_MENU_START_X ((COLS - BOTTOM_MENU_WIDTH) / 2)
-#define BOTTOM_MENU_START_Y (BOTTOM_MENU + 1)
-
-#define POPUP_HEIGHT (HEIGHT / 4)
-#define POPUP_WIDTH (WIDTH - 8)
-//#define POPUP_WIDTH ((WIDTH / 4) * 3)
-#define POPUP_START_Y ((LINES - POPUP_HEIGHT) / 2)
-#define POPUP_START_X ((COLS - POPUP_WIDTH) / 2)
-
-//POPUP_MESG_HEIGHT is set to 1
-#define POPUP_MESG_WIDTH (POPUP_WIDTH - 4)
-#define POPUP_MESG_START_Y (POPUP_START_Y + 1)
-#define POPUP_MESG_START_X (POPUP_START_X + 2)
-
-//POPUP_MESG_C_HEIGHT is set to 1
-#define POPUP_MESG_C_WIDTH (POPUP_WIDTH / 4)
-#define POPUP_MESG_C_START_Y (POPUP_START_Y + POPUP_HEIGHT - 2)
-
-#define POPUP_MESG_C1_START_X (POPUP_START_X + 6)
-
-#define POPUP_MESG_C2_START_X (POPUP_START_X + POPUP_MESG_WIDTH - POPUP_MESG_C_WIDTH - 2)
-
 #define HIDE_SHOW(PAN,h_s) (h_s ? show_panel(PAN) : hide_panel(PAN))
 
-void displayWindowSet(PANEL ** panel,int win_set, bool show)
+int startY()
+{
+    return ((LINES - HEIGHT) / 2);    
+}
+
+int startX()
+{
+    return ((COLS - WIDTH) / 2);
+}
+
+int menuBoxHeight()
+{
+    return (HEIGHT - 6);
+}
+
+int menuBoxWidth()
+{
+    return (WIDTH - 4);
+}
+
+int menuStartY()
+{
+    return ((LINES - menuBoxHeight()) / 2);
+}
+
+int menuStartX()
+{
+    return ((COLS - menuBoxWidth()) / 2);
+}
+
+int bottomMenu()
+{
+    return (menuStartY() + menuBoxHeight());
+}
+
+int bottomMenuWidth()
+{
+    return (menuBoxWidth() / 4);
+}
+
+int bottomMenuStartX()
+{
+    return ((COLS - bottomMenuWidth()) / 2);
+}
+
+int bottomMenuStartY()
+{
+    return (bottomMenu() + 1);
+}
+
+int popupHeight()
+{
+    return (HEIGHT / 4);
+}
+
+int popupWidth()
+{
+    return (WIDTH - 8);
+}
+
+int popupStartY()
+{
+    return ((LINES - popupHeight()) / 2);
+}
+
+int popupStartX()
+{
+    return ((COLS - popupWidth()) / 2);
+}
+
+int popupMesgWidth()
+{
+    return (popupWidth() - 4);
+}
+
+int popupMesgStartY()
+{
+    return (popupStartY() + 1);
+}
+
+int popupMesgStartX()
+{
+    return (popupStartX() + 2);
+}
+
+int popupMesgChoiceWidth()
+{
+    return (popupWidth() / 4);
+}
+
+int popupMesgChoiceStartY()
+{
+    return (popupStartY() + popupHeight() - 2);
+}
+
+int popupMesgChoice1StartX()
+{
+    return (popupStartX() + 6);
+}
+
+int popupMesgChoice2StartX()
+{
+    return (popupStartX() + popupMesgWidth() - popupMesgChoiceWidth() - 2);
+}
+
+void displayPanelSet(PANEL ** panel,int panel_total, bool show)
 {
     int cntr;
 
-    switch(win_set)
+    for(cntr = 0; cntr < panel_total; cntr++)
     {
-        case 0:
-        {
-            for(cntr = 0; cntr < 4; cntr++)
-            {
-                HIDE_SHOW(panel[cntr],show);
-            }
-            break;
-        }
-        case 1:
-        {
-            for(cntr = 4; cntr < 8; cntr++)
-            {
-                HIDE_SHOW(panel[cntr],show);
-            }
-            break;
-        }
-        default:
-        {
-            printf("displayWindowSet: invalid window set input\n");
-        }
+        HIDE_SHOW(panel[cntr],show);
     }
 }
 
@@ -81,75 +136,52 @@ void initPanels(PANEL ** panel,WINDOW ** win, int win_total)
         panel[cntr] = new_panel(win[cntr]);
     }
 
-    //auto-hide the popup box
-    displayWindowSet(panel,1,FALSE);
-
-    //set two main menu panels to point to each other, for tabbing feature
-    set_panel_userptr(panel[2],panel[3]);
-    set_panel_userptr(panel[3],panel[2]);
-
-    //set popup options to be linked to each other
-    set_panel_userptr(panel[6],panel[7]);
-    set_panel_userptr(panel[7],panel[6]);
+    setPanelsPtr(panel[win_total - 1],panel[win_total - 2]);
 }
 
-int initWindows(WINDOW ** win,int win_total)
+int initWindows(WINDOW ** win1,WINDOW ** win2)
 {
-    init_pair(2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(3, COLOR_WHITE, COLOR_WHITE);
-    init_pair(4, COLOR_CYAN, COLOR_CYAN);
-
-    switch(win_total)
-    {
-        case 8:
-        {
-            //confirmation popup border
-            win[4] = newwin(POPUP_HEIGHT,POPUP_WIDTH,POPUP_START_Y,POPUP_START_X);
-            wbkgd(win[4],COLOR_PAIR(3));
-            //confirmation messsage box
-            win[5] = newwin(1,POPUP_MESG_WIDTH,POPUP_MESG_START_Y,POPUP_MESG_START_X);
-            wbkgd(win[5],COLOR_PAIR(4));
-            //confirmation box choice 1
-            win[6] = newwin(1,POPUP_MESG_C_WIDTH,POPUP_MESG_C_START_Y,POPUP_MESG_C1_START_X);
-            wbkgd(win[6],COLOR_PAIR(4));
-            //confirmation box choice 1
-            win[7] = newwin(1,POPUP_MESG_C_WIDTH,POPUP_MESG_C_START_Y,POPUP_MESG_C2_START_X);
-            wbkgd(win[7],COLOR_PAIR(4));
-        }
-        case 4: //basic single menu window
-        {
             //main menu drop-shadow
-            win[0] = newwin(HEIGHT,WIDTH,START_Y + 1,START_X + 2);
-            wbkgd(win[0],COLOR_PAIR(2));
+            win1[0] = newwin(HEIGHT,WIDTH,startY() + 1,startX() + 2);
+            wbkgd(win1[0],COLOR_PAIR(2));
             //main menu border
-            win[1] = newwin(HEIGHT,WIDTH,START_Y,START_X);
-            wbkgd(win[1],COLOR_PAIR(3));
+            win1[1] = newwin(HEIGHT,WIDTH,startY(),startX());
+            wbkgd(win1[1],COLOR_PAIR(3));
             //main menu
-            win[2] = newwin(MENU_BOX_HEIGHT,MENU_BOX_WIDTH,MENU_START_Y,MENU_START_X);
-            wbkgd(win[2],COLOR_PAIR(4));
+            win1[2] = newwin(menuBoxHeight(),menuBoxWidth(),menuStartY(),menuStartX());
+            wbkgd(win1[2],COLOR_PAIR(4));
             //cancel button
-            win[3] = newwin(1,BOTTOM_MENU_WIDTH,BOTTOM_MENU_START_Y,BOTTOM_MENU_START_X);
-            wbkgd(win[3],COLOR_PAIR(4));
-            break;
-        }
-        default:
-        {
-            printf("initWindows: invalid option for win_total.\n");
-            return 1;
-        }
-    }
-
+            win1[3] = newwin(1,bottomMenuWidth(),bottomMenuStartY(),bottomMenuStartX());
+            wbkgd(win1[3],COLOR_PAIR(4));
+            
+            //confirmation popup dropshadow
+            win2[0] = newwin(popupHeight(),popupWidth(),popupStartY() + 1,popupStartX() + 2);
+            wbkgd(win2[0],COLOR_PAIR(2));
+            //confirmation popup border
+            win2[1] = newwin(popupHeight(),popupWidth(),popupStartY(),popupStartX());
+            wbkgd(win2[1],COLOR_PAIR(3));
+            //confirmation messsage box
+            win2[2] = newwin(1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
+            wbkgd(win2[2],COLOR_PAIR(4));
+            //confirmation box choice 1
+            win2[3] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice1StartX());
+            wbkgd(win2[3],COLOR_PAIR(4));
+            //confirmation box choice 1
+            win2[4] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice2StartX());
+            wbkgd(win2[4],COLOR_PAIR(4));
+            
     return 0;
 }
 
 void freePanels(PANEL ** panel,WINDOW ** win, int win_total)
 {
     int cntr;
-
+    printf("freePanels:%d\n",win_total);
     freeWindows(win,win_total);
 
     for(cntr = 0; cntr < win_total; cntr++)
     {
+        printf("deleting panel %d\n",cntr);
         if(del_panel(panel[cntr]))
         {
             printf("ERROR: could not delete panel %d.\n",cntr);
@@ -160,10 +192,14 @@ void freePanels(PANEL ** panel,WINDOW ** win, int win_total)
 void freeWindows(WINDOW ** win, int win_total)
 {
     int cntr;
-
+    printf("freeWindows:%d\n",win_total);
     for(cntr = 0; cntr < win_total; cntr++)
     {
-        delwin(win[cntr]);
+        printf("deleting window %d\n",cntr);
+        if(!(delwin(win[cntr])))
+        {
+            printf("freeWindows: delwin() returned error for window %d\n",cntr);
+        }
     }
 }
 
@@ -176,6 +212,78 @@ void refreshAllWindows(WINDOW ** win, int win_total)
         wrefresh(win[cntr]);
     }
 }
+
+void setPanelsPtr(PANEL * panel1, PANEL * panel2)
+{
+    set_panel_userptr(panel1,panel2);
+    set_panel_userptr(panel2,panel1);
+}
+
 /*
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 */
+
+//void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options)
+
+
+int mainMenu(char ** menu_options)
+{
+    if(!menu_options)
+    {
+        printf("mainMenu: Inputted char** is NULL\n");
+        return 1;
+    }
+
+    int c;
+    WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP];
+    PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP];
+
+    //initialize curses
+    initscr();
+    start_color();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+
+    //initialize color pairs
+    init_pair(1, COLOR_BLACK, COLOR_BLUE);
+    init_pair(2, COLOR_BLACK, COLOR_BLACK);
+    init_pair(3, COLOR_WHITE, COLOR_WHITE);
+    init_pair(4, COLOR_CYAN, COLOR_CYAN);
+
+    wbkgd(stdscr, COLOR_PAIR(1));
+    refresh();
+
+    //create windows
+    if(initWindows(win_main, win_popup))
+    {
+        endwin();
+        printf("mainMenu: Could not initialize main windows.\n");
+        return 2;
+    }
+
+    //set new windows to panels
+    initPanels(panel_main,win_main,WIN_NUM_MAIN);
+    initPanels(panel_popup,win_popup,WIN_NUM_POPUP);
+    displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
+    update_panels();
+    doupdate();
+
+    c = getch();
+
+    //show popup box
+    displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
+    update_panels();
+    doupdate();
+
+    c = getch();
+
+    //clean up all curses items;
+    freePanels(panel_main,win_main, WIN_NUM_MAIN);
+    //freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
+
+    refresh();
+    endwin();
+
+    return 0;
+}

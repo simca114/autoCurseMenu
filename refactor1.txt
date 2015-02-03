@@ -1,0 +1,23 @@
+moving menu management into menu function from test
+---------------------------------------------------
+
+- move inits from test.c into menu function
+- Split window/panels int seperate arrays so each corrisponds to their own menus
+ * add #define for panel/window sets
+
+###################
+functions to modify
+###################
+
+- displayWindowSet()
+ * replace switch with single for loop
+ * change arg name "win_total" to "panel_total"
+ * changed function name to "displayPanelSet()"
+
+- initPanels()
+ * write function to set panel_userptr to each other ("setPanelsPtr()")
+
+- initWindows()
+ * move color_pairs to mainMenu()
+ * change int arg to second "WINDOW**", each window is custom so set all individually
+ * create functions to replace macros that calculated window sizes and positions

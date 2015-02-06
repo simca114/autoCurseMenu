@@ -176,12 +176,10 @@ int initWindows(WINDOW ** win1,WINDOW ** win2)
 void freePanels(PANEL ** panel,WINDOW ** win, int win_total)
 {
     int cntr;
-    printf("freePanels:%d\n",win_total);
     freeWindows(win,win_total);
 
     for(cntr = 0; cntr < win_total; cntr++)
     {
-        printf("deleting panel %d\n",cntr);
         if(del_panel(panel[cntr]))
         {
             printf("ERROR: could not delete panel %d.\n",cntr);
@@ -192,10 +190,8 @@ void freePanels(PANEL ** panel,WINDOW ** win, int win_total)
 void freeWindows(WINDOW ** win, int win_total)
 {
     int cntr;
-    printf("freeWindows:%d\n",win_total);
     for(cntr = win_total - 1; cntr >= 0; cntr--)
     {
-        printf("deleting window %d\n",cntr);
         if((delwin(win[cntr])) == ERR)
         {
             printf("freeWindows: delwin() returned error for window %d\n",cntr);
@@ -265,12 +261,12 @@ int mainMenu(char ** menu_options)
     //set new windows to panels
     initPanels(panel_main,win_main,WIN_NUM_MAIN);
     initPanels(panel_popup,win_popup,WIN_NUM_POPUP);
- //   displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
+    displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
     update_panels();
     doupdate();
 
     c = getch();
-/*&
+
     //show popup box
     displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
     update_panels();
@@ -283,7 +279,7 @@ int mainMenu(char ** menu_options)
     doupdate();
 
     c = getch();
-*/
+
     //clean up all curses items;
     freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
     freePanels(panel_main,win_main, WIN_NUM_MAIN);

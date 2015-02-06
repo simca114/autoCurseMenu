@@ -9,6 +9,40 @@
 #define HEIGHT 20
 #define WIDTH 40
 
+#define START_Y ((LINES - HEIGHT) / 2)
+#define START_X ((COLS - WIDTH) / 2)
+
+#define MENU_BOX_HEIGHT (HEIGHT - 6)
+#define MENU_BOX_WIDTH (WIDTH - 4)
+#define MENU_START_Y ((LINES - MENU_BOX_HEIGHT) / 2)
+#define MENU_START_X ((COLS - MENU_BOX_WIDTH) / 2)
+
+#define BOTTOM_MENU ((MENU_START_Y + MENU_BOX_HEIGHT))
+
+//BOTTOM_MENU HEIGHT is set to 1
+#define BOTTOM_MENU_WIDTH (MENU_BOX_WIDTH / 4)
+#define BOTTOM_MENU_START_X ((COLS - BOTTOM_MENU_WIDTH) / 2)
+#define BOTTOM_MENU_START_Y (BOTTOM_MENU + 1)
+//
+#define POPUP_HEIGHT (HEIGHT / 4)
+#define POPUP_WIDTH (WIDTH - 8)
+////#define POPUP_WIDTH ((WIDTH / 4) * 3)
+#define POPUP_START_Y ((LINES - POPUP_HEIGHT) / 2)
+#define POPUP_START_X ((COLS - POPUP_WIDTH) / 2)
+//
+////POPUP_MESG_HEIGHT is set to 1
+#define POPUP_MESG_WIDTH (POPUP_WIDTH - 4)
+#define POPUP_MESG_START_Y (POPUP_START_Y + 1)
+#define POPUP_MESG_START_X (POPUP_START_X + 2)
+//
+////POPUP_MESG_C_HEIGHT is set to 1
+#define POPUP_MESG_C_WIDTH (POPUP_WIDTH / 4)
+#define POPUP_MESG_C_START_Y (POPUP_START_Y + POPUP_HEIGHT - 2)
+//
+#define POPUP_MESG_C1_START_X (POPUP_START_X + 6)
+
+#define POPUP_MESG_C2_START_X (POPUP_START_X + POPUP_MESG_WIDTH - POPUP_MESG_C_WIDTH - 2)
+
 #define HIDE_SHOW(PAN,h_s) (h_s ? show_panel(PAN) : hide_panel(PAN))
 
 int startY()
@@ -154,6 +188,24 @@ int initWindows(WINDOW ** win1,WINDOW ** win2)
     win1[3] = newwin(1,bottomMenuWidth(),bottomMenuStartY(),bottomMenuStartX());
     wbkgd(win1[3],COLOR_PAIR(4));
 
+
+    //confirmation popup dropshadow
+    win2[0] = newwin(POPUP_HEIGHT,POPUP_WIDTH,POPUP_START_Y + 1,POPUP_START_X + 2);
+    wbkgd(win2[0],COLOR_PAIR(2));
+    //confirmation popup border
+    win2[1] = newwin(popupHeight(),popupWidth(),popupStartY(),popupStartX());
+    wbkgd(win2[1],COLOR_PAIR(3));
+    //confirmation messsage box
+    win2[2] = newwin(1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
+    wbkgd(win2[2],COLOR_PAIR(4));
+    //confirmation box choice 1
+    win2[3] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice1StartX());
+    wbkgd(win2[3],COLOR_PAIR(4));
+    //confirmation box choice 1
+    win2[4] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice2StartX());
+    wbkgd(win2[4],COLOR_PAIR(4));
+
+/*
     //confirmation popup dropshadow
     win2[0] = newwin(popupHeight(),popupWidth(),popupStartY() + 1,popupStartX() + 2);
     wbkgd(win2[0],COLOR_PAIR(2));
@@ -169,7 +221,7 @@ int initWindows(WINDOW ** win1,WINDOW ** win2)
     //confirmation box choice 1
     win2[4] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice2StartX());
     wbkgd(win2[4],COLOR_PAIR(4));
-
+*/
     return 0;
 }
 
@@ -193,10 +245,10 @@ void freeWindows(WINDOW ** win, int win_total)
 {
     int cntr;
     printf("freeWindows:%d\n",win_total);
-    for(cntr = win_total - 1; cntr >= 0; cntr--)
+    for(cntr = 0; cntr < win_total; cntr++)
     {
         printf("deleting window %d\n",cntr);
-        if((delwin(win[cntr])) == ERR)
+        if(!(delwin(win[cntr])))
         {
             printf("freeWindows: delwin() returned error for window %d\n",cntr);
         }
@@ -265,12 +317,12 @@ int mainMenu(char ** menu_options)
     //set new windows to panels
     initPanels(panel_main,win_main,WIN_NUM_MAIN);
     initPanels(panel_popup,win_popup,WIN_NUM_POPUP);
- //   displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
+    displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
     update_panels();
     doupdate();
 
     c = getch();
-/*&
+
     //show popup box
     displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
     update_panels();
@@ -283,10 +335,11 @@ int mainMenu(char ** menu_options)
     doupdate();
 
     c = getch();
-*/
+
     //clean up all curses items;
-    freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
     freePanels(panel_main,win_main, WIN_NUM_MAIN);
+    freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
+
     refresh();
     endwin();
 

@@ -219,33 +219,74 @@ void setPanelsPtr(PANEL * panel1, PANEL * panel2)
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 */
 
-//void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options)
+ITEM * initItems(char * menu_option)
+{
+    return new_item(menu_option,"");
+}
 
+//void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
+void initMenuPopup(MENU * menu, WINDOW * win, ITEM ** item, char * option)
+{
+    item[0] = initItems(option);
+    item[1] = (ITEM *)NULL;
+
+    menu = new_menu((ITEM**)item);
+
+    set_menu_win(menu, win);
+    set_menu_format(menu, 1, 1);
+
+    set_menu_mark(menu,"");
+    set_menu_fore(menu,COLOR_PAIR(4));
+
+    post_menu(menu);
+    wrefresh(win);
+}
+
+void freeItems(ITEM ** items,int num_options)
+{
+    int cntr;
+
+    for(cntr = 0;cntr < num_options;cntr++)
+    {
+        free_item(items[cntr]);
+    }
+}
+
+void freeMenu(MENU *menu,ITEM ** items,int num_options)
+{
+    unpost_menu(menu);
+
+    freeItems(items,num_options);
+    
+    free_menu(menu);
+}
 
 int mainMenu(char ** menu_options)
 {
     if(!menu_options)
     {
-        printf("mainMenu: Inputted char** is NULL\n");
+        printf("mainmenu: inputted char** is null\n");
         return 1;
     }
 
     int c;
     WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP];
     PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP];
+    ITEM ** items_main, *item_choice1[1], *item_choice2[1];
+    MENU * menu_main, *menu_popup[2];
 
     //initialize curses
     initscr();
     start_color();
     cbreak();
     noecho();
-    keypad(stdscr, TRUE);
+    keypad(stdscr, true);
 
     //initialize color pairs
     init_pair(1, COLOR_BLACK, COLOR_BLUE);
     init_pair(2, COLOR_BLACK, COLOR_BLACK);
     init_pair(3, COLOR_WHITE, COLOR_WHITE);
-    init_pair(4, COLOR_CYAN, COLOR_CYAN);
+    init_pair(4, COLOR_BLACK, COLOR_CYAN);
 
     wbkgd(stdscr, COLOR_PAIR(1));
     refresh();
@@ -261,6 +302,13 @@ int mainMenu(char ** menu_options)
     //set new windows to panels
     initPanels(panel_main,win_main,WIN_NUM_MAIN);
     initPanels(panel_popup,win_popup,WIN_NUM_POPUP);
+
+    //create main menu
+    //
+    //create popup menu
+    initMenuPopup(menu_popup[0], panel_window(panel_popup[3]), item_choice1, "< Yes >");
+    initMenuPopup(menu_popup[1], panel_window(panel_popup[4]), item_choice2, "< No >");
+
     displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
     update_panels();
     doupdate();
@@ -274,13 +322,10 @@ int mainMenu(char ** menu_options)
 
     c = getch();
 
-    displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
-    update_panels();
-    doupdate();
-
-    c = getch();
-
     //clean up all curses items;
+    freeMenu(menu_popup[1],item_choice2,1);
+    freeMenu(menu_popup[0],item_choice1,1);
+
     freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
     freePanels(panel_main,win_main, WIN_NUM_MAIN);
     refresh();

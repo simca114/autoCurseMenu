@@ -42,7 +42,8 @@ void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
 //functions for creating and clearing menus
 void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
-void initItems(char * menu_options);
+void initMenuPopup(MENU * menu, WINDOW * win, ITEM ** item, char * option);
+ITEM * initItems(char * menu_option);
 void freeItems(ITEM ** items,int num_options);
 void freeMenu(MENU *menu,ITEM ** items,int num_options);
 

@@ -1,0 +1,24 @@
+REFACTOR 2
+-----------------------------------------
+Move window inits for popup windows menus
+-----------------------------------------
+
+- Update WIN_MAX_POPUP to 3 to reflect this change
+- remove SetPanelsPtr() and any calls to it
+
+###################
+functions to modify
+###################
+
+- initWindows()
+ * remove excess window inits
+
+- initMenuPopup()
+ * create subwindows for both menu's
+ * change function to handle both menu inits at once
+
+- freeMenu()
+ * change to handle clearing all menu's in one window
+ * update to clear subwindows assigned to menu
+- mainMenu()
+ * update function calls to match new changes

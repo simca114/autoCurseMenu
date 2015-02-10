@@ -4,7 +4,7 @@
 #include "autoCurseMenu.h"
 
 #define WIN_NUM_MAIN 4
-#define WIN_NUM_POPUP 5
+#define WIN_NUM_POPUP 3
 
 #define HEIGHT 20
 #define WIDTH 40
@@ -136,7 +136,6 @@ void initPanels(PANEL ** panel,WINDOW ** win, int win_total)
         panel[cntr] = new_panel(win[cntr]);
     }
 
-    setPanelsPtr(panel[win_total - 1],panel[win_total - 2]);
 }
 
 int initWindows(WINDOW ** win1,WINDOW ** win2)
@@ -163,12 +162,6 @@ int initWindows(WINDOW ** win1,WINDOW ** win2)
     //confirmation messsage box
     win2[2] = newwin(1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
     wbkgd(win2[2],COLOR_PAIR(4));
-    //confirmation box choice 1
-    win2[3] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice1StartX());
-    wbkgd(win2[3],COLOR_PAIR(4));
-    //confirmation box choice 1
-    win2[4] = newwin(1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice2StartX());
-    wbkgd(win2[4],COLOR_PAIR(4));
 
     return 0;
 }
@@ -209,12 +202,6 @@ void refreshAllWindows(WINDOW ** win, int win_total)
     }
 }
 
-void setPanelsPtr(PANEL * panel1, PANEL * panel2)
-{
-    set_panel_userptr(panel1,panel2);
-    set_panel_userptr(panel2,panel1);
-}
-
 /*
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 */
@@ -225,20 +212,35 @@ ITEM * initItems(char * menu_option)
 }
 
 //void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
-void initMenuPopup(MENU * menu, WINDOW * win, ITEM ** item, char * option)
+void initMenuPopup(MENU ** menu, WINDOW * win, ITEM ** item1, ITEM ** item2, char ** menu_options)
 {
-    item[0] = initItems(option);
-    item[1] = (ITEM *)NULL;
+    item1[0] = initItems(menu_options[0]);
+    item1[1] = (ITEM *)NULL;
+    item2[0] = initItems(menu_options[1]);
+    item2[1] = (ITEM *)NULL;
 
-    menu = new_menu((ITEM**)item);
+    menu[0] = new_menu((ITEM**)item1);
+    menu[1] = new_menu((ITEM**)item2);
 
-    set_menu_win(menu, win);
-    set_menu_format(menu, 1, 1);
+    //setup < yes > box
+    set_menu_win(menu[0], win);
+    set_menu_sub(menu[0],subwin(win,1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice1StartX()));
 
-    set_menu_mark(menu,"");
-    set_menu_fore(menu,COLOR_PAIR(4));
+    //setup < no > box
+    set_menu_win(menu[1], win);
+    set_menu_sub(menu[1],subwin(win,1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice2StartX()));
 
-    post_menu(menu);
+    set_menu_format(menu[0], 1, 1);
+    set_menu_format(menu[1], 1, 1);
+
+    set_menu_mark(menu[0],"");
+    set_menu_mark(menu[1],"");
+
+    set_menu_fore(menu[0],COLOR_PAIR(4));
+    set_menu_fore(menu[1],COLOR_PAIR(4));
+
+    post_menu(menu[0]);
+    post_menu(menu[1]);
     wrefresh(win);
 }
 
@@ -252,13 +254,19 @@ void freeItems(ITEM ** items,int num_options)
     }
 }
 
-void freeMenu(MENU *menu,ITEM ** items,int num_options)
+void freeMenu(MENU ** menu,ITEM ** item1,ITEM ** item2,int num_options)
 {
-    unpost_menu(menu);
+    unpost_menu(menu[0]);
+    unpost_menu(menu[1]);
 
-    freeItems(items,num_options);
-    
-    free_menu(menu);
+    freeItems(item1,num_options);
+    freeItems(item2,num_options);
+
+    delwin(menu_sub(menu[1]));
+    delwin(menu_sub(menu[0]));
+
+    free_menu(menu[1]);
+    free_menu(menu[0]);
 }
 
 int mainMenu(char ** menu_options)
@@ -272,8 +280,12 @@ int mainMenu(char ** menu_options)
     int c;
     WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP];
     PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP];
-    ITEM ** items_main, *item_choice1[1], *item_choice2[1];
-    MENU * menu_main, *menu_popup[2];
+    ITEM ** items_main, *items_popup1[1], *items_popup2[1];
+    MENU *menu_main[2], *menu_popup[2];
+    char *popup_options[2];
+
+    popup_options[0] = "< Yes >";
+    popup_options[1] = "< No >";
 
     //initialize curses
     initscr();
@@ -306,8 +318,7 @@ int mainMenu(char ** menu_options)
     //create main menu
     //
     //create popup menu
-    initMenuPopup(menu_popup[0], panel_window(panel_popup[3]), item_choice1, "< Yes >");
-    initMenuPopup(menu_popup[1], panel_window(panel_popup[4]), item_choice2, "< No >");
+    initMenuPopup(menu_popup, panel_window(panel_popup[1]), items_popup1, items_popup2, popup_options);
 
     displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
     update_panels();
@@ -322,9 +333,9 @@ int mainMenu(char ** menu_options)
 
     c = getch();
 
+
     //clean up all curses items;
-    freeMenu(menu_popup[1],item_choice2,1);
-    freeMenu(menu_popup[0],item_choice1,1);
+    freeMenu(menu_popup,items_popup1,items_popup2,1);
 
     freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
     freePanels(panel_main,win_main, WIN_NUM_MAIN);

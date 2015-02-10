@@ -37,15 +37,14 @@ void initPanels(PANEL ** panel,WINDOW ** win, int win_total);
 void freeWindows(WINDOW ** win, int win_total);
 void freePanels(PANEL ** panel, WINDOW ** win, int win_total);
 void refreshAllWindows(WINDOW ** win, int win_total);
-void setPanelsPtr(PANEL * panel1, PANEL * panel2);
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
 //functions for creating and clearing menus
 void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
-void initMenuPopup(MENU * menu, WINDOW * win, ITEM ** item, char * option);
+void initMenuPopup(MENU ** menu, WINDOW * win, ITEM ** item1, ITEM ** item2, char ** menu_options);
 ITEM * initItems(char * menu_option);
 void freeItems(ITEM ** items,int num_options);
-void freeMenu(MENU *menu,ITEM ** items,int num_options);
+void freeMenu(MENU ** menu,ITEM ** item1,ITEM ** item2,int num_options);
 
 //functions for menu interactions
 int mainMenu(char ** menu_options);

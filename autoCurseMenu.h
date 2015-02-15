@@ -6,6 +6,7 @@
 #include <panel.h>
 #include <menu.h>
 #include <stdio.h>
+#include <string.h>
 
 //functions to calculate windows
 int startY();
@@ -48,4 +49,4 @@ void freeMenu(MENU ** menu,ITEM ** item1,ITEM ** item2,int num_options);
 
 //functions for menu interactions
 int mainMenu(char ** menu_options);
-int popupMenu(PANEL ** panel);
+char popupMenu(MENU ** menu,WINDOW * menu_win,WINDOW * mesg_win,char * option);

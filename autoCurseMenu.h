@@ -42,11 +42,13 @@ void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
 //functions for creating and clearing menus
 void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
-void initMenuPopup(MENU ** menu, WINDOW * win, ITEM ** item1, ITEM ** item2, char ** menu_options);
+WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options);
 ITEM * initItems(char * menu_option);
 void freeItems(ITEM ** items,int num_options);
 void freeMenu(MENU ** menu,ITEM ** item1,ITEM ** item2,int num_options);
+void freeMenuWins(WINDOW * win_menu, WINDOW ** items, int num_options);
 
 //functions for menu interactions
 int mainMenu(char ** menu_options);
-char popupMenu(MENU ** menu,WINDOW * menu_win,WINDOW * mesg_win,char * option);
+int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option);
+

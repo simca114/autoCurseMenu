@@ -3,6 +3,9 @@
  */
 #include "autoCurseMenu.h"
 
+#define ENTER 10
+#define ESCAPE 27
+
 #define WIN_NUM_MAIN 4
 #define WIN_NUM_POPUP 3
 
@@ -212,39 +215,24 @@ ITEM * initItems(char * menu_option)
 }
 
 //void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
-void initMenuPopup(MENU ** menu, WINDOW * win, ITEM ** item1, ITEM ** item2, char ** menu_options)
+WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options)
 {
-    item1[0] = initItems(menu_options[0]);
-    item1[1] = (ITEM *)NULL;
-    item2[0] = initItems(menu_options[1]);
-    item2[1] = (ITEM *)NULL;
-
-    menu[0] = new_menu((ITEM**)item1);
-    menu[1] = new_menu((ITEM**)item2);
-
+    int cntr;
+    WINDOW **items;
+    items = (WINDOW**)malloc(2 * sizeof(WINDOW *));
     //setup < yes > box
-    set_menu_win(menu[0], win);
-    set_menu_sub(menu[0],subwin(win,1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice1StartX()));
+    items[0] = subwin(win_menu,1,strlen(menu_options[0]),popupMesgChoiceStartY(),popupMesgChoice1StartX());
+    items[1] = subwin(win_menu,1,strlen(menu_options[1]),popupMesgChoiceStartY(),popupMesgChoice2StartX());
 
-    //setup < no > box
-    set_menu_win(menu[1], win);
-    set_menu_sub(menu[1],subwin(win,1,popupMesgChoiceWidth(),popupMesgChoiceStartY(),popupMesgChoice2StartX()));
+    for(cntr = 0; cntr < 2; cntr++)
+    {
+	wbkgd(items[cntr],COLOR_PAIR(4));
+	wprintw(items[cntr],"%s",menu_options[cntr]);
+    }
 
-    set_menu_format(menu[0], 1, 1);
-    set_menu_format(menu[1], 1, 1);
+    wrefresh(win_menu);
 
-    set_menu_mark(menu[0],"");
-    set_menu_mark(menu[1],"");
-
-    set_menu_fore(menu[0],COLOR_PAIR(4));
-    set_menu_fore(menu[1],COLOR_PAIR(4));
-
-    set_menu_back(menu[0],COLOR_PAIR(1));
-    set_menu_back(menu[1],COLOR_PAIR(1));
-
-    post_menu(menu[0]);
-    post_menu(menu[1]);
-    wrefresh(win);
+    return items;
 }
 
 void freeItems(ITEM ** items,int num_options)
@@ -254,6 +242,16 @@ void freeItems(ITEM ** items,int num_options)
     for(cntr = 0;cntr < num_options;cntr++)
     {
         free_item(items[cntr]);
+    }
+}
+
+void freeMenuWins(WINDOW * win_menu, WINDOW ** items, int num_options)
+{
+    int cntr;
+
+    for(cntr = num_options - 1; cntr >= 0; cntr--)
+    {
+	delwin(items[cntr]);
     }
 }
 
@@ -280,12 +278,13 @@ int mainMenu(char ** menu_options)
         return 1;
     }
 
-    int c;
+    int c, choice;
     WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP];
     PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP];
-    ITEM ** items_main, *items_popup1[1], *items_popup2[1];
-    MENU *menu_main[2], *menu_popup[2];
-    char *popup_options[2], choice;
+    WINDOW ** items_popup;
+    //ITEM ** items_main, *items_popup1[1], *items_popup2[1];
+    //MENU *menu_main[2], *menu_popup[2];
+    char *popup_options[2];
 
     popup_options[0] = "< Yes >";
     popup_options[1] = "< No >";
@@ -322,10 +321,10 @@ int mainMenu(char ** menu_options)
     //create main menu
     //
     //create popup menu
-    initMenuPopup(menu_popup, panel_window(panel_popup[1]), items_popup1, items_popup2, popup_options);
+    items_popup = initMenuPopup(panel_window(panel_popup[1]),popup_options);
 
-    choice = 'n';
-    while(choice == 'n')
+    choice = 0;
+    while(choice == 0)
     {
         displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
         update_panels();
@@ -338,12 +337,12 @@ int mainMenu(char ** menu_options)
         update_panels();
         doupdate();
 
-        choice = popupMenu(menu_popup,panel_window(panel_popup[1]),panel_window(panel_popup[2]),"TestPhrase");
+        choice = popupMenu(panel_window(panel_popup[1]),panel_window(panel_popup[2]),items_popup,"TestPhrase");
     }
     
 
     //clean up all curses items;
-    freeMenu(menu_popup,items_popup1,items_popup2,1);
+    freeMenuWins(panel_window(panel_popup[1]),items_popup,2);
 
     freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
     freePanels(panel_main,win_main, WIN_NUM_MAIN);
@@ -353,63 +352,51 @@ int mainMenu(char ** menu_options)
     return 0;
 }
 
-char popupMenu(MENU ** menu,WINDOW * menu_win,WINDOW * mesg_win,char * choice)
+int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
 {
-    int c = 0;
-    MENU * current_menu = menu[0];
+    int current = 1, c = 0;
+    WINDOW * current_win = items[0];
 
-    wprintw(mesg_win," %s , are you sure?",choice);
+    wprintw(mesg_win," %s , are you sure?",option);
     wrefresh(mesg_win);
 
-    keypad(menu_sub(current_menu),TRUE);
-    wbkgd(menu_sub(current_menu),COLOR_PAIR(1));
-    wrefresh(menu_win);
+    keypad(menu_win,TRUE);
+    wbkgd(current_win,COLOR_PAIR(1));
+    wrefresh(current_win);
 
-    while(c = wgetch(menu_sub(current_menu))) 
+    while(c != ENTER && c != ESCAPE) 
     {
+	c = wgetch(menu_win);
         switch(c)
         {
             case KEY_LEFT:
             {
-                keypad(menu_sub(current_menu),FALSE);
-		wbkgd(menu_sub(current_menu),COLOR_PAIR(4));
-		wrefresh(menu_sub(current_menu));
-                current_menu = menu[0];
-                keypad(menu_sub(current_menu),TRUE);
-		wbkgd(menu_sub(current_menu),COLOR_PAIR(1));
-		wrefresh(menu_sub(current_menu));
+		current = 1;
+		wbkgd(current_win,COLOR_PAIR(4));
+		wrefresh(current_win);
+                current_win = items[0];
+		wbkgd(current_win,COLOR_PAIR(1));
+		wrefresh(current_win);
                 break;
             }
             case KEY_RIGHT:
             {
-                keypad(menu_sub(current_menu),FALSE);
-		wbkgd(menu_sub(current_menu),COLOR_PAIR(4));
-		wrefresh(menu_sub(current_menu));
-                current_menu = menu[1];
-                keypad(menu_sub(current_menu),TRUE);
-		wbkgd(menu_sub(current_menu),COLOR_PAIR(1));
-		wrefresh(menu_sub(current_menu));
+		current = 0;
+		wbkgd(current_win,COLOR_PAIR(4));
+		wrefresh(current_win);
+                current_win = items[1];
+		wbkgd(current_win,COLOR_PAIR(1));
+		wrefresh(current_win);
                 break;
             }
-            case 27:
+	    case ESCAPE:
             {
-                return 'n';
-            }
-            case 10:
-            {
-		wbkgd(menu_sub(current_menu),COLOR_PAIR(4));
-                if((strcmp(item_name(current_item(current_menu)),"< Yes >")) == 0)
-                {
-                    return 'y';
-                }
-                else
-                {
-                    return 'n';
-                }
-            }
+		current = 0;
+		break;
+	    }
         }
-        wrefresh(menu_win);
     }
+    wbkgd(current_win,COLOR_PAIR(4));
 
-    return 'n';
+    return current;
 }

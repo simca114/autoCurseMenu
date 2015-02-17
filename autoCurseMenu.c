@@ -348,7 +348,7 @@ int mainMenu(char ** menu_options,int num_options)
     choice = selected = 0;
     range[0] = 0;
     range[1] = menuBoxHeight() - 1;
-
+    highlight(panel_window(panel_menu[0]),true);
     
     while(choice == 0)
     {
@@ -376,12 +376,28 @@ int mainMenu(char ** menu_options,int num_options)
 			debug_pos++;
 			refresh();
 		    }
+		    else if(selected == range[0])
+		    {
+			mvprintw(debug_pos,0,"You are at the top of the item list!!");
+			debug_pos++;
+			refresh();
+
+			range[0]--;
+			range[1]--;
+
+		    }
+		    break;
 	    	}
 		case KEY_DOWN:
 		{
+		    highlight(panel_window(panel_menu[selected]),false);
 		    selected++;
+		    highlight(panel_window(panel_menu[selected]),true);
+		    break;
 		}
 	    }
+	    update_panels();
+	    doupdate();
 	}
 
         //show popup box
@@ -453,4 +469,24 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
     highlight(current_win,false);
 
     return current;
+}
+
+void shiftItems(PANEL ** items,int num_items,bool up)
+{
+    int cntr;
+
+    if(up == true)
+    {
+	for(cntr = 0; cntr < num_items;cntr++)
+	{
+	    move_panel(items[cntr],((startMenuY() + cntr) - 1),startMenuX());
+	}
+    }
+    else
+    {
+	for(cntr = 0; cntr < num_items;cntr++)
+	{
+	    move_panel(items[cntr],((startMenuY() + cntr) + 1),startMenuX());
+	}
+    }    
 }

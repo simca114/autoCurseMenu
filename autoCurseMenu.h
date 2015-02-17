@@ -49,4 +49,4 @@ void freeMenuWins(WINDOW ** items, int num_options);
 void highlight(WINDOW * win,bool high);
 int mainMenu(char ** menu_options,int num_options);
 int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option);
-
+void shiftItems(PANEL ** items,int num_items,bool up);

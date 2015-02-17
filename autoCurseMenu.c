@@ -282,6 +282,18 @@ void freeMenuWins(WINDOW ** items, int num_options)
     free(items);
 }
 
+void highlight(WINDOW * win,bool high)
+{
+    if(high == true)
+    {
+	wbkgd(win,COLOR_PAIR(1));
+    }
+    else
+    {
+	wbkgd(win,COLOR_PAIR(4));
+    }
+}
+
 int mainMenu(char ** menu_options,int num_options)
 {
     if(!menu_options)
@@ -290,7 +302,7 @@ int mainMenu(char ** menu_options,int num_options)
         return -1;
     }
 
-    int c, choice;
+    int c, choice, selected, range[2];
     WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP], *panel_menu_wins[num_options + 1];
     PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP], **panel_menu;
     WINDOW ** items_popup;
@@ -333,14 +345,44 @@ int mainMenu(char ** menu_options,int num_options)
     //create popup menu
     items_popup = initMenuPopup(panel_window(panel_popup[1]),popup_options);
 
-    choice = 0;
+    choice = selected = 0;
+    range[0] = 0;
+    range[1] = menuBoxHeight() - 1;
+
+    
     while(choice == 0)
     {
+	c = 0;
+        //hide confirmation box
         displayPanelSet(panel_popup,WIN_NUM_POPUP,false);
         update_panels();
         doupdate();
 
-        c = getch();
+
+        while(c != ENTER)
+	{
+	//debugging messages
+	mvprintw(debug_pos,0,"Choice:%d selected:%d Range:%d,%d",choice,selected,range[0],range[1]);
+        debug_pos++;
+        refresh();
+            c = getch();
+            switch(c)
+	    {
+	    	case KEY_UP:
+	    	{
+		    if(selected == 0)
+		    {
+			mvprintw(debug_pos,0,"You are at the top of the item list!!");
+			debug_pos++;
+			refresh();
+		    }
+	    	}
+		case KEY_DOWN:
+		{
+		    selected++;
+		}
+	    }
+	}
 
         //show popup box
         displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
@@ -373,7 +415,7 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
     wrefresh(mesg_win);
 
     keypad(menu_win,TRUE);
-    wbkgd(current_win,COLOR_PAIR(1));
+    highlight(current_win,true);
     wrefresh(current_win);
 
     while(c != ENTER && c != ESCAPE) 
@@ -384,20 +426,20 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
             case KEY_LEFT:
             {
 		current = 1;
-		wbkgd(current_win,COLOR_PAIR(4));
+		highlight(current_win,false);
 		wrefresh(current_win);
                 current_win = items[0];
-		wbkgd(current_win,COLOR_PAIR(1));
+		highlight(current_win,true);
 		wrefresh(current_win);
                 break;
             }
             case KEY_RIGHT:
             {
 		current = 0;
-		wbkgd(current_win,COLOR_PAIR(4));
+		highlight(current_win,false);
 		wrefresh(current_win);
                 current_win = items[1];
-		wbkgd(current_win,COLOR_PAIR(1));
+		highlight(current_win,true);
 		wrefresh(current_win);
                 break;
             }
@@ -408,7 +450,7 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
 	    }
         }
     }
-    wbkgd(current_win,COLOR_PAIR(4));
+    highlight(current_win,false);
 
     return current;
 }

@@ -46,6 +46,7 @@ WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options);
 void freeMenuWins(WINDOW ** items, int num_options);
 
 //functions for menu interactions
+void highlight(WINDOW * win,bool high);
 int mainMenu(char ** menu_options,int num_options);
 int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option);
 

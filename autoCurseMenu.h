@@ -7,6 +7,7 @@
 #include <menu.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 //functions to calculate windows
 int startY();
@@ -35,20 +36,16 @@ int popupMesgChoice2StartX();
 void displayPanelSet(PANEL ** panel, int panel_total, bool show);
 int initWindows(WINDOW ** win1,WINDOW ** win2);
 void initPanels(PANEL ** panel,WINDOW ** win, int win_total);
-void freeWindows(WINDOW ** win, int win_total);
-void freePanels(PANEL ** panel, WINDOW ** win, int win_total);
+void freePanels(PANEL ** panel, int win_total);
 void refreshAllWindows(WINDOW ** win, int win_total);
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
 //functions for creating and clearing menus
-void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
+PANEL ** initMenu(WINDOW ** menu_items,char ** menu_options,int num_options);
 WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options);
-ITEM * initItems(char * menu_option);
-void freeItems(ITEM ** items,int num_options);
-void freeMenu(MENU ** menu,ITEM ** item1,ITEM ** item2,int num_options);
-void freeMenuWins(WINDOW * win_menu, WINDOW ** items, int num_options);
+void freeMenuWins(WINDOW ** items, int num_options);
 
 //functions for menu interactions
-int mainMenu(char ** menu_options);
+int mainMenu(char ** menu_options,int num_options);
 int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option);
 

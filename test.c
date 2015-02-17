@@ -11,22 +11,33 @@ int main()
                         "Choice3",
                         "Choice4",
                         "Choice5",
+                        "Choice6",
+                        "Choice7",
+                        "Choice8",
+                        "Choice9",
+                        "Choice10",
+                        "Choice11",
+                        "Choice12",
+                        "Choice13",
+                        "Choice14",
+                        "Choice15",
+                        "Choice16",
                      };
 
-    if((error_code = mainMenu(sample)))
+    if((error_code = mainMenu(sample,16)))
     {
         switch(error_code)
         {
-            case 1:
+            case -1:
             {
                 printf("Error %d: input char** is not initialized\n",error_code);
-                exit(1);
+                exit(-1);
                 break;
             }
-            case 2:
+            case -2:
             {
                 printf("Error %d: Failed to initialize window set\n",error_code);
-                exit(1);
+                exit(-1);
                 break;
             }
         }

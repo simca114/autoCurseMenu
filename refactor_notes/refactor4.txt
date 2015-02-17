@@ -1,0 +1,33 @@
+REFACTOR 4
+---------------------------------------
+Setup Main Menu to work with panel sets
+---------------------------------------
+
+- need to setup initMenu() with a set of windows and corrisponding panels for each item
+- need to modify any arguement that uses MENU or ITEMS to reflect new changes
+
+###################
+functions to modify
+###################
+
+- initMenu()
+ * change args: pass in a allocated window set, char** of options, and number of options
+  @ for number of options need to add 1 to total for the extra exit button
+ * have it return a alloceted set of panels assigned to each WINDOW
+
+- initItems()
+ * removed
+
+- freeItems()
+ * removed
+
+- freeMenu()
+ * removed
+
+- mainMenu()
+ * make changes to reflect new menu configuration
+  @ clear MENU/ITEM refrences
+  @ setup WINDOW/PANEL variables for new menu configuration
+- freePanels()
+ * remove WINDOW** from arguements
+ * have the PANEL's WINDOW be extracted from the PANEL and freed before the PANEL

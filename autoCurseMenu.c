@@ -6,13 +6,15 @@
 #define ENTER 10
 #define ESCAPE 27
 
-#define WIN_NUM_MAIN 4
+#define WIN_NUM_MAIN 2
 #define WIN_NUM_POPUP 3
 
 #define HEIGHT 20
 #define WIDTH 40
 
 #define HIDE_SHOW(PAN,h_s) (h_s ? show_panel(PAN) : hide_panel(PAN))
+
+int debug_pos = 0;
 
 int startY()
 {
@@ -149,12 +151,6 @@ int initWindows(WINDOW ** win1,WINDOW ** win2)
     //main menu border
     win1[1] = newwin(HEIGHT,WIDTH,startY(),startX());
     wbkgd(win1[1],COLOR_PAIR(3));
-    //main menu
-    win1[2] = newwin(menuBoxHeight(),menuBoxWidth(),menuStartY(),menuStartX());
-    wbkgd(win1[2],COLOR_PAIR(4));
-    //cancel button
-    win1[3] = newwin(1,bottomMenuWidth(),bottomMenuStartY(),bottomMenuStartX());
-    wbkgd(win1[3],COLOR_PAIR(4));
 
     //confirmation popup dropshadow
     win2[0] = newwin(popupHeight(),popupWidth(),popupStartY() + 1,popupStartX() + 2);
@@ -169,28 +165,22 @@ int initWindows(WINDOW ** win1,WINDOW ** win2)
     return 0;
 }
 
-void freePanels(PANEL ** panel,WINDOW ** win, int win_total)
+void freePanels(PANEL ** panel, int win_total)
 {
     int cntr;
-    freeWindows(win,win_total);
 
+    for(cntr = 0; cntr < win_total; cntr++)
+    {
+	if(delwin(panel_window(panel[cntr])))
+        {
+	    printf("ERROR: could not delete panel window %d.\n",cntr);
+        }
+    }
     for(cntr = 0; cntr < win_total; cntr++)
     {
         if(del_panel(panel[cntr]))
         {
             printf("ERROR: could not delete panel %d.\n",cntr);
-        }
-    }
-}
-
-void freeWindows(WINDOW ** win, int win_total)
-{
-    int cntr;
-    for(cntr = win_total - 1; cntr >= 0; cntr--)
-    {
-        if((delwin(win[cntr])) == ERR)
-        {
-            printf("freeWindows: delwin() returned error for window %d\n",cntr);
         }
     }
 }
@@ -209,12 +199,57 @@ void refreshAllWindows(WINDOW ** win, int win_total)
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 */
 
-ITEM * initItems(char * menu_option)
+PANEL ** initMenu(WINDOW ** menu_items,char ** menu_options,int num_options)
 {
-    return new_item(menu_option,"");
+    int cntr;
+    PANEL **items;
+    items = (PANEL**)malloc((num_options + 1) * sizeof(PANEL*));
+
+    //create windows and panels for each menu item
+    for(cntr = 0; cntr < num_options;cntr++)
+    {
+	menu_items[cntr] = newwin(1,menuBoxWidth(),menuStartY() + cntr,menuStartX());
+        wbkgd(menu_items[cntr],COLOR_PAIR(4));
+	wprintw(menu_items[cntr],"%s",menu_options[cntr]);
+        wrefresh(menu_items[cntr]);
+    }
+    menu_items[num_options] = newwin(1,strlen("< Exit >"),bottomMenuStartY(),bottomMenuStartX());
+    wbkgd(menu_items[num_options],COLOR_PAIR(4));
+    wprintw(menu_items[num_options],"< Exit >");
+
+    for(cntr = 0; cntr < num_options;cntr++)
+    {
+	items[cntr] = new_panel(menu_items[cntr]);
+    }
+    items[num_options] = new_panel(menu_items[num_options]);
+
+    //hide the panels that exceed window range
+    if(num_options > menuBoxHeight())
+    {
+	mvprintw(debug_pos,0,"Need to hide panel\n");
+        debug_pos++;
+        refresh();
+	for(cntr = menuBoxHeight(); cntr < num_options; cntr++)
+	{
+            mvprintw(debug_pos,0,"Hiding panel %d\n",cntr);
+            debug_pos++;
+	    refresh();
+
+	    if((hide_panel(items[cntr])) == ERR)
+            {
+            	mvprintw(debug_pos,0,"ERROR: hide_panel(%d) failed\n",cntr);
+            	debug_pos++;
+	    	refresh();
+	    }
+	} 
+    }
+
+    update_panels();
+    doupdate();
+
+    return items;
 }
 
-//void initMenu(MENU ** menu,PANEL ** panel,ITEM ** items,char ** menu_options,int num_options);
 WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options)
 {
     int cntr;
@@ -235,17 +270,7 @@ WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options)
     return items;
 }
 
-void freeItems(ITEM ** items,int num_options)
-{
-    int cntr;
-
-    for(cntr = 0;cntr < num_options;cntr++)
-    {
-        free_item(items[cntr]);
-    }
-}
-
-void freeMenuWins(WINDOW * win_menu, WINDOW ** items, int num_options)
+void freeMenuWins(WINDOW ** items, int num_options)
 {
     int cntr;
 
@@ -253,37 +278,22 @@ void freeMenuWins(WINDOW * win_menu, WINDOW ** items, int num_options)
     {
 	delwin(items[cntr]);
     }
+
+    free(items);
 }
 
-void freeMenu(MENU ** menu,ITEM ** item1,ITEM ** item2,int num_options)
-{
-    unpost_menu(menu[0]);
-    unpost_menu(menu[1]);
-
-    freeItems(item1,num_options);
-    freeItems(item2,num_options);
-
-    delwin(menu_sub(menu[1]));
-    delwin(menu_sub(menu[0]));
-
-    free_menu(menu[1]);
-    free_menu(menu[0]);
-}
-
-int mainMenu(char ** menu_options)
+int mainMenu(char ** menu_options,int num_options)
 {
     if(!menu_options)
     {
         printf("mainmenu: inputted char** is null\n");
-        return 1;
+        return -1;
     }
 
     int c, choice;
-    WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP];
-    PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP];
+    WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP], *panel_menu_wins[num_options + 1];
+    PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP], **panel_menu;
     WINDOW ** items_popup;
-    //ITEM ** items_main, *items_popup1[1], *items_popup2[1];
-    //MENU *menu_main[2], *menu_popup[2];
     char *popup_options[2];
 
     popup_options[0] = "< Yes >";
@@ -311,7 +321,7 @@ int mainMenu(char ** menu_options)
     {
         endwin();
         printf("mainMenu: Could not initialize main windows.\n");
-        return 2;
+        return -2;
     }
 
     //set new windows to panels
@@ -319,7 +329,7 @@ int mainMenu(char ** menu_options)
     initPanels(panel_popup,win_popup,WIN_NUM_POPUP);
 
     //create main menu
-    //
+    panel_menu = initMenu(panel_menu_wins,menu_options,num_options);
     //create popup menu
     items_popup = initMenuPopup(panel_window(panel_popup[1]),popup_options);
 
@@ -334,18 +344,20 @@ int mainMenu(char ** menu_options)
 
         //show popup box
         displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
+        show_panel(panel_menu[num_options]);
         update_panels();
         doupdate();
 
         choice = popupMenu(panel_window(panel_popup[1]),panel_window(panel_popup[2]),items_popup,"TestPhrase");
     }
     
-
     //clean up all curses items;
-    freeMenuWins(panel_window(panel_popup[1]),items_popup,2);
+    freeMenuWins(items_popup,2);
 
-    freePanels(panel_popup,win_popup, WIN_NUM_POPUP);
-    freePanels(panel_main,win_main, WIN_NUM_MAIN);
+    freePanels(panel_menu, num_options + 1);
+    free(panel_menu);
+    freePanels(panel_popup, WIN_NUM_POPUP);
+    freePanels(panel_main, WIN_NUM_MAIN);
     refresh();
     endwin();
 

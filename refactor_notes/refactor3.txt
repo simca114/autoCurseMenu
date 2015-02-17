@@ -1,0 +1,24 @@
+REFACTOR 3
+----------------------------------------------
+Replace MENU's with WINDOW sets for Popup menu
+----------------------------------------------
+
+- Need to replace all instances of MENU with WINDOW for better flexibility
+- Menu items will by subwindows of menu win and will return indexs
+
+###################
+functions to modify
+###################
+
+- initMenuPopup()
+ * change arguements to be menu win, char**options, and have it return an array of windows
+
+- freeMenu()
+ * make a temporary clone of this function in order to clear new menu type
+ * called freeMenuWin()
+
+- mainMenu()
+ * update to reflect new parameters for popupMenu()
+
+- popupMenu()
+ * change interactions to reflect new window changes

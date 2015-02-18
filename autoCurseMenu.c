@@ -3,6 +3,7 @@
  */
 #include "autoCurseMenu.h"
 
+#define TAB 9
 #define ENTER 10
 #define ESCAPE 27
 
@@ -302,11 +303,12 @@ int mainMenu(char ** menu_options,int num_options)
         return -1;
     }
 
-    int c, choice, selected, range[2];
+    int c, choice, selected, offset, range[2];
     WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP], *panel_menu_wins[num_options + 1];
     PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP], **panel_menu;
     WINDOW ** items_popup;
     char *popup_options[2];
+    bool in_menu;
 
     popup_options[0] = "< Yes >";
     popup_options[1] = "< No >";
@@ -345,11 +347,12 @@ int mainMenu(char ** menu_options,int num_options)
     //create popup menu
     items_popup = initMenuPopup(panel_window(panel_popup[1]),popup_options);
 
-    choice = selected = 0;
+    choice = selected = offset = 0;
     range[0] = 0;
     range[1] = menuBoxHeight() - 1;
     highlight(panel_window(panel_menu[0]),true);
-    
+    in_menu = true;    
+
     while(choice == 0)
     {
 	c = 0;
@@ -362,9 +365,19 @@ int mainMenu(char ** menu_options,int num_options)
         while(c != ENTER)
 	{
 	//debugging messages
+        if(debug_pos >= LINES)
+        {
+	    for(debug_pos = 0; debug_pos < LINES;debug_pos++)
+	    {
+		mvprintw(debug_pos,0,"                                           ");
+	    }
+	    debug_pos = 0;
+	}
 	mvprintw(debug_pos,0,"Choice:%d selected:%d Range:%d,%d",choice,selected,range[0],range[1]);
         debug_pos++;
         refresh();
+	//end debug mesgs
+
             c = getch();
             switch(c)
 	    {
@@ -374,26 +387,77 @@ int mainMenu(char ** menu_options,int num_options)
 		    {
 			mvprintw(debug_pos,0,"You are at the top of the item list!!");
 			debug_pos++;
-			refresh();
+		
+	refresh();
 		    }
 		    else if(selected == range[0])
 		    {
-			mvprintw(debug_pos,0,"You are at the top of the item list!!");
+			mvprintw(debug_pos,0,"Shifting ranges upward");
 			debug_pos++;
 			refresh();
 
+			shiftItems(panel_menu,num_options,true,&offset);
+			hide_panel(panel_menu[range[1]]);
+			highlight(panel_window(panel_menu[selected]),false);
+			selected--;
+			show_panel(panel_menu[range[0] - 1]);
 			range[0]--;
 			range[1]--;
-
+			highlight(panel_window(panel_menu[selected]),true);
+		    }
+		    else
+		    {
+			highlight(panel_window(panel_menu[selected]),false);
+			selected--;
+			highlight(panel_window(panel_menu[selected]),true);
 		    }
 		    break;
 	    	}
 		case KEY_DOWN:
 		{
-		    highlight(panel_window(panel_menu[selected]),false);
-		    selected++;
-		    highlight(panel_window(panel_menu[selected]),true);
+		    if(selected == (num_options - 1))
+		    {
+			mvprintw(debug_pos,0,"You are at the bottom of the item list!!");
+			debug_pos++;
+			refresh();
+		    }
+		    else if(selected == range[1])
+		    {
+			mvprintw(debug_pos,0,"Shifting ranges downward");
+			debug_pos++;
+			refresh();
+
+			shiftItems(panel_menu,num_options,false,&offset);
+			hide_panel(panel_menu[range[0]]);
+			highlight(panel_window(panel_menu[selected]),false);
+			selected++;
+			show_panel(panel_menu[range[1] + 1]);
+			range[0]++;
+			range[1]++;
+			highlight(panel_window(panel_menu[selected]),true);
+		    }
+		    else
+		    {
+			highlight(panel_window(panel_menu[selected]),false);
+			selected++;
+			highlight(panel_window(panel_menu[selected]),true);
+		    }
 		    break;
+		}
+		case TAB:
+		{
+		    if(in_menu == true)
+		    {
+			highlight(panel_window(panel_menu[selected]),false);
+			highlight(panel_window(panel_menu[num_options]),true);
+			in_menu = false;
+		    }
+		    else
+		    {
+			highlight(panel_window(panel_menu[selected]),true);
+			highlight(panel_window(panel_menu[num_options]),false);
+			in_menu = true;
+		    } 
 		}
 	    }
 	    update_panels();
@@ -471,22 +535,24 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
     return current;
 }
 
-void shiftItems(PANEL ** items,int num_items,bool up)
+void shiftItems(PANEL ** items,int num_items,bool up,int * offset)
 {
     int cntr;
-
-    if(up == true)
+    if(up == 1)
     {
+
 	for(cntr = 0; cntr < num_items;cntr++)
 	{
-	    move_panel(items[cntr],((startMenuY() + cntr) - 1),startMenuX());
+	    move_panel(items[cntr],((menuStartY()+*offset) + (cntr+1)),menuStartX());
 	}
+	(*offset)++;
     }
     else
     {
 	for(cntr = 0; cntr < num_items;cntr++)
 	{
-	    move_panel(items[cntr],((startMenuY() + cntr) + 1),startMenuX());
+	    move_panel(items[cntr],((menuStartY()+*offset) + (cntr-1)),menuStartX());
 	}
+	(*offset)--;
     }    
 }

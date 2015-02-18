@@ -211,7 +211,7 @@ PANEL ** initMenu(WINDOW ** menu_items,char ** menu_options,int num_options)
     {
 	menu_items[cntr] = newwin(1,menuBoxWidth(),menuStartY() + cntr,menuStartX());
         wbkgd(menu_items[cntr],COLOR_PAIR(4));
-	wprintw(menu_items[cntr],"%s",menu_options[cntr]);
+	wprintw(menu_items[cntr]," %s",menu_options[cntr]);
         wrefresh(menu_items[cntr]);
     }
     menu_items[num_options] = newwin(1,strlen("< Exit >"),bottomMenuStartY(),bottomMenuStartX());
@@ -227,15 +227,8 @@ PANEL ** initMenu(WINDOW ** menu_items,char ** menu_options,int num_options)
     //hide the panels that exceed window range
     if(num_options > menuBoxHeight())
     {
-	mvprintw(debug_pos,0,"Need to hide panel\n");
-        debug_pos++;
-        refresh();
 	for(cntr = menuBoxHeight(); cntr < num_options; cntr++)
 	{
-            mvprintw(debug_pos,0,"Hiding panel %d\n",cntr);
-            debug_pos++;
-	    refresh();
-
 	    if((hide_panel(items[cntr])) == ERR)
             {
             	mvprintw(debug_pos,0,"ERROR: hide_panel(%d) failed\n",cntr);
@@ -373,10 +366,6 @@ int mainMenu(char ** menu_options,int num_options)
 	    }
 	    debug_pos = 0;
 	}
-	mvprintw(debug_pos,0,"Choice:%d selected:%d Range:%d,%d",choice,selected,range[0],range[1]);
-        debug_pos++;
-        refresh();
-	//end debug mesgs
 
             c = getch();
             switch(c)
@@ -387,17 +376,9 @@ int mainMenu(char ** menu_options,int num_options)
 		    {
 		    	if(selected == 0)
 		    	{
-			mvprintw(debug_pos,0,"You are at the top of the item list!!");
-			debug_pos++;
-		
-	refresh();
 		    	}
 		    	else if(selected == range[0])
 		    	{
-			    mvprintw(debug_pos,0,"Shifting ranges upward");
-			    debug_pos++;
-			    refresh();
-
 			    shiftItems(panel_menu,num_options,true,&offset);
 			    hide_panel(panel_menu[range[1]]);
 			    highlight(panel_window(panel_menu[selected]),false);
@@ -422,16 +403,9 @@ int mainMenu(char ** menu_options,int num_options)
 		    {
 		    	if(selected == (num_options - 1))
 		    	{
-			    mvprintw(debug_pos,0,"You are at the bottom of the item list!!");
-			    debug_pos++;
-			    refresh();
 		        }
 		        else if(selected == range[1])
 		        {
-			    mvprintw(debug_pos,0,"Shifting ranges downward");
-			    debug_pos++;
-			    refresh();
-
 			    shiftItems(panel_menu,num_options,false,&offset);
 			    hide_panel(panel_menu[range[0]]);
 			    highlight(panel_window(panel_menu[selected]),false);

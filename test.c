@@ -4,7 +4,7 @@
 
 int main()
 {
-    int error_code;
+    int choice;
     char *sample[] = {
                         "Choice1",
                         "Choice2",
@@ -24,23 +24,17 @@ int main()
                         "Choice16",
                      };
 
-    if((error_code = mainMenu(sample,16)))
+    choice = mainMenu(sample,16);
+
+    system("clear");
+
+    if(choice == -1)
     {
-        switch(error_code)
-        {
-            case -1:
-            {
-                printf("Error %d: input char** is not initialized\n",error_code);
-                exit(-1);
-                break;
-            }
-            case -2:
-            {
-                printf("Error %d: Failed to initialize window set\n",error_code);
-                exit(-1);
-                break;
-            }
-        }
+	printf("Program terminated by exit\n");
+    }
+    else
+    {
+	printf("Choice %d was selected\n",choice + 1);
     }
 
     return 0;

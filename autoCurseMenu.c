@@ -353,7 +353,7 @@ int mainMenu(char ** menu_options,int num_options)
     highlight(panel_window(panel_menu[0]),true);
     in_menu = true;    
 
-    while(choice == 0)
+    while(choice != 1)
     {
 	c = 0;
         //hide confirmation box
@@ -362,7 +362,7 @@ int mainMenu(char ** menu_options,int num_options)
         doupdate();
 
 
-        while(c != ENTER)
+        while(c != ENTER && c != ESCAPE)
 	{
 	//debugging messages
         if(debug_pos >= LINES)
@@ -383,64 +383,70 @@ int mainMenu(char ** menu_options,int num_options)
 	    {
 	    	case KEY_UP:
 	    	{
-		    if(selected == 0)
+		    if(in_menu == true)
 		    {
+		    	if(selected == 0)
+		    	{
 			mvprintw(debug_pos,0,"You are at the top of the item list!!");
 			debug_pos++;
 		
 	refresh();
-		    }
-		    else if(selected == range[0])
-		    {
-			mvprintw(debug_pos,0,"Shifting ranges upward");
-			debug_pos++;
-			refresh();
+		    	}
+		    	else if(selected == range[0])
+		    	{
+			    mvprintw(debug_pos,0,"Shifting ranges upward");
+			    debug_pos++;
+			    refresh();
 
-			shiftItems(panel_menu,num_options,true,&offset);
-			hide_panel(panel_menu[range[1]]);
-			highlight(panel_window(panel_menu[selected]),false);
-			selected--;
-			show_panel(panel_menu[range[0] - 1]);
-			range[0]--;
-			range[1]--;
-			highlight(panel_window(panel_menu[selected]),true);
-		    }
-		    else
-		    {
-			highlight(panel_window(panel_menu[selected]),false);
-			selected--;
-			highlight(panel_window(panel_menu[selected]),true);
+			    shiftItems(panel_menu,num_options,true,&offset);
+			    hide_panel(panel_menu[range[1]]);
+			    highlight(panel_window(panel_menu[selected]),false);
+			    selected--;
+			    show_panel(panel_menu[range[0] - 1]);
+			    range[0]--;
+			    range[1]--;
+			    highlight(panel_window(panel_menu[selected]),true);
+		        }
+		    	else
+		    	{
+		       	    highlight(panel_window(panel_menu[selected]),false);
+			    selected--;
+			    highlight(panel_window(panel_menu[selected]),true);
+		    	}
 		    }
 		    break;
 	    	}
 		case KEY_DOWN:
 		{
-		    if(selected == (num_options - 1))
+		    if(in_menu == true)
 		    {
-			mvprintw(debug_pos,0,"You are at the bottom of the item list!!");
-			debug_pos++;
-			refresh();
-		    }
-		    else if(selected == range[1])
-		    {
-			mvprintw(debug_pos,0,"Shifting ranges downward");
-			debug_pos++;
-			refresh();
+		    	if(selected == (num_options - 1))
+		    	{
+			    mvprintw(debug_pos,0,"You are at the bottom of the item list!!");
+			    debug_pos++;
+			    refresh();
+		        }
+		        else if(selected == range[1])
+		        {
+			    mvprintw(debug_pos,0,"Shifting ranges downward");
+			    debug_pos++;
+			    refresh();
 
-			shiftItems(panel_menu,num_options,false,&offset);
-			hide_panel(panel_menu[range[0]]);
-			highlight(panel_window(panel_menu[selected]),false);
-			selected++;
-			show_panel(panel_menu[range[1] + 1]);
-			range[0]++;
-			range[1]++;
-			highlight(panel_window(panel_menu[selected]),true);
-		    }
-		    else
-		    {
-			highlight(panel_window(panel_menu[selected]),false);
-			selected++;
-			highlight(panel_window(panel_menu[selected]),true);
+			    shiftItems(panel_menu,num_options,false,&offset);
+			    hide_panel(panel_menu[range[0]]);
+			    highlight(panel_window(panel_menu[selected]),false);
+			    selected++;
+			    show_panel(panel_menu[range[1] + 1]);
+			    range[0]++;
+			    range[1]++;
+			    highlight(panel_window(panel_menu[selected]),true);
+		   	}
+		    	else
+		   	{
+			    highlight(panel_window(panel_menu[selected]),false);
+			    selected++;
+			    highlight(panel_window(panel_menu[selected]),true);
+		    	}
 		    }
 		    break;
 		}
@@ -457,20 +463,36 @@ int mainMenu(char ** menu_options,int num_options)
 			highlight(panel_window(panel_menu[selected]),true);
 			highlight(panel_window(panel_menu[num_options]),false);
 			in_menu = true;
-		    } 
+		    }
+		    break;
+		}
+		case ENTER:
+		{
+		    if(in_menu == true)
+		    {
+        	    	//show popup box
+        	    	displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
+        	    	show_panel(panel_menu[num_options]);
+        	    	update_panels();
+        	    	doupdate();
+
+        	    	choice = popupMenu(panel_window(panel_popup[1]),panel_window(panel_popup[2]),items_popup,menu_options[selected]);
+		    	break;
+		    }
+		    else
+		    {
+			choice = 1;
+		    }
+		}
+		case ESCAPE:
+		{
+		    choice = 1;
 		}
 	    }
 	    update_panels();
 	    doupdate();
 	}
 
-        //show popup box
-        displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
-        show_panel(panel_menu[num_options]);
-        update_panels();
-        doupdate();
-
-        choice = popupMenu(panel_window(panel_popup[1]),panel_window(panel_popup[2]),items_popup,"TestPhrase");
     }
     
     //clean up all curses items;
@@ -483,7 +505,12 @@ int mainMenu(char ** menu_options,int num_options)
     refresh();
     endwin();
 
-    return 0;
+    if(in_menu == false || c == ESCAPE)
+    {
+	selected = -1;
+    }
+
+    return selected;
 }
 
 int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
@@ -491,7 +518,7 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
     int current = 1, c = 0;
     WINDOW * current_win = items[0];
 
-    wprintw(mesg_win," %s , are you sure?",option);
+    mvwprintw(mesg_win,0,0," %s , are you sure?",option);
     wrefresh(mesg_win);
 
     keypad(menu_win,TRUE);

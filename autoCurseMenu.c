@@ -15,7 +15,23 @@
 
 #define HIDE_SHOW(PAN,h_s) (h_s ? show_panel(PAN) : hide_panel(PAN))
 
-int debug_pos = 0;
+#define EXIT_IF_NULL(var,...) do {  \
+  if(!var)                          \
+  {                                 \
+    endwin();                       \
+    fprintf(stderr,__VA_ARGS__);    \
+    exit(-1);                       \
+  }                                 \
+}while(0)
+
+#define EXIT_IF_NONZERO(var,...) do { \
+  if(var)                             \
+  {                                   \
+    endwin();                         \
+    fprintf(stderr,__VA_ARGS__);      \
+    exit(-1);                         \
+  }                                   \
+}while(0)
 
 int startY()
 {
@@ -128,7 +144,8 @@ void displayPanelSet(PANEL ** panel,int panel_total, bool show)
 
     for(cntr = 0; cntr < panel_total; cntr++)
     {
-        HIDE_SHOW(panel[cntr],show);
+        EXIT_IF_NONZERO( (HIDE_SHOW(panel[cntr],show)) ,
+			  "ERROR:displayPanelSet(): hide/show panel:%d\n",cntr);
     }
 }
 
@@ -139,31 +156,43 @@ void initPanels(PANEL ** panel,WINDOW ** win, int win_total)
     //attach the windows to individual panels
     for(cntr = 0; cntr < win_total; cntr++)
     {
-        panel[cntr] = new_panel(win[cntr]);
+        EXIT_IF_NULL( (panel[cntr] = new_panel(win[cntr])) ,
+		      "ERROR:initPanels(): initializeing panel:%d\n",cntr);
     }
 
 }
 
-int initWindows(WINDOW ** win1,WINDOW ** win2)
+void initWindows(WINDOW ** win1,WINDOW ** win2)
 {
     //main menu drop-shadow
-    win1[0] = newwin(HEIGHT,WIDTH,startY() + 1,startX() + 2);
-    wbkgd(win1[0],COLOR_PAIR(2));
+    EXIT_IF_NULL( (win1[0] = newwin(HEIGHT,WIDTH,startY() + 1,startX() + 2)) ,
+		  "ERROR:initWindows(): creating main shadow failed\n");
+    EXIT_IF_NONZERO( (wbkgd(win1[0],COLOR_PAIR(2))) ,
+		     "ERROR:initWindows(): setting main shadow background failed\n");
+
     //main menu border
-    win1[1] = newwin(HEIGHT,WIDTH,startY(),startX());
-    wbkgd(win1[1],COLOR_PAIR(3));
+    EXIT_IF_NULL( (win1[1] = newwin(HEIGHT,WIDTH,startY(),startX())) ,
+		  "ERROR:initWindows(): creating main menu box failed\n");
+    EXIT_IF_NONZERO( (wbkgd(win1[1],COLOR_PAIR(3))),
+		     "ERROR:initWindows(): setting main shadow background failed\n");
 
     //confirmation popup dropshadow
-    win2[0] = newwin(popupHeight(),popupWidth(),popupStartY() + 1,popupStartX() + 2);
-    wbkgd(win2[0],COLOR_PAIR(2));
-    //confirmation popup border
-    win2[1] = newwin(popupHeight(),popupWidth(),popupStartY(),popupStartX());
-    wbkgd(win2[1],COLOR_PAIR(3));
-    //confirmation messsage box
-    win2[2] = newwin(1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
-    wbkgd(win2[2],COLOR_PAIR(4));
+    EXIT_IF_NULL( (win2[0] = newwin(popupHeight(),popupWidth(),popupStartY() + 1,popupStartX() + 2) ),
+                  "ERROR:initWindows(): creating popup box shadow failed\n");
+    EXIT_IF_NONZERO( (wbkgd(win2[0],COLOR_PAIR(2))) ,
+		     "ERROR:initWindows(): setting popup shadow background failed\n");
 
-    return 0;
+    //confirmation popup border
+    EXIT_IF_NULL( (win2[1] = newwin(popupHeight(),popupWidth(),popupStartY(),popupStartX())) ,
+		  "ERROR:initWindows(): creating popup box failed\n");
+    EXIT_IF_NONZERO( (wbkgd(win2[1],COLOR_PAIR(3))) ,
+		     "ERROR:initWindows(): setting popup box background failed\n");
+
+    //confirmation messsage box
+    EXIT_IF_NULL( (win2[2] = newwin(1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX())) ,
+		  "ERROR:initWindows(): creating popup header field failed\n");
+    EXIT_IF_NONZERO( (wbkgd(win2[2],COLOR_PAIR(4))) ,
+		     "ERROR:initWindows(): setting popup header background failed\n");
 }
 
 void freePanels(PANEL ** panel, int win_total)
@@ -172,17 +201,13 @@ void freePanels(PANEL ** panel, int win_total)
 
     for(cntr = 0; cntr < win_total; cntr++)
     {
-	if(delwin(panel_window(panel[cntr])))
-        {
-	    printf("ERROR: could not delete panel window %d.\n",cntr);
-        }
+	EXIT_IF_NONZERO( (delwin(panel_window(panel[cntr]))) ,
+			 "ERROR:freePanels(): could not delete panel window %d.\n",cntr);
     }
     for(cntr = 0; cntr < win_total; cntr++)
     {
-        if(del_panel(panel[cntr]))
-        {
-            printf("ERROR: could not delete panel %d.\n",cntr);
-        }
+        EXIT_IF_NONZERO( (del_panel(panel[cntr])) ,
+			 "ERROR:freePanels(): could not delete panel %d.\n",cntr);
     }
 }
 
@@ -192,7 +217,8 @@ void refreshAllWindows(WINDOW ** win, int win_total)
 
     for(cntr = 0; cntr < win_total; cntr++)
     {
-        wrefresh(win[cntr]);
+        EXIT_IF_NONZERO( (wrefresh(win[cntr])) ,
+			 "ERROR:refreshAllWindows(): wrefresh[%d] failed\n",cntr);
     }
 }
 
@@ -204,42 +230,45 @@ PANEL ** initMenu(WINDOW ** menu_items,char ** menu_options,int num_options)
 {
     int cntr;
     PANEL **items;
-    items = (PANEL**)malloc((num_options + 1) * sizeof(PANEL*));
+    EXIT_IF_NULL( (items = (PANEL**)malloc((num_options + 1) * sizeof(PANEL*))) ,
+		  "ERROR:initMenu(): malloc failed\n");
 
     //create windows and panels for each menu item
     for(cntr = 0; cntr < num_options;cntr++)
     {
-	menu_items[cntr] = newwin(1,menuBoxWidth(),menuStartY() + cntr,menuStartX());
-        wbkgd(menu_items[cntr],COLOR_PAIR(4));
-	wprintw(menu_items[cntr]," %s",menu_options[cntr]);
-        wrefresh(menu_items[cntr]);
+	EXIT_IF_NULL( (menu_items[cntr] = newwin(1,menuBoxWidth(),menuStartY() + cntr,menuStartX())) ,
+		      "ERROR:initMenu(): win_menu_item[%d] create failed\n",cntr);
+        EXIT_IF_NONZERO( (wbkgd(menu_items[cntr],COLOR_PAIR(4))) ,
+			 "ERROR:initMenu(): win_menu_item[%d] set bkgd failed\n",cntr);
+	EXIT_IF_NONZERO( (wprintw(menu_items[cntr]," %s",menu_options[cntr])) ,
+			 "ERROR:initMenu(): win_menu_item[%d] wprintw() failed\n",cntr);
+        EXIT_IF_NONZERO( (wrefresh(menu_items[cntr])) ,
+			 "ERROR:initMenu(): win_menu_item[%d] wrefresh() failed\n",cntr);
     }
-    menu_items[num_options] = newwin(1,strlen("< Exit >"),bottomMenuStartY(),bottomMenuStartX());
-    wbkgd(menu_items[num_options],COLOR_PAIR(4));
-    wprintw(menu_items[num_options],"< Exit >");
+    EXIT_IF_NULL( (menu_items[num_options] = newwin(1,strlen("< Exit >") + 2,bottomMenuStartY(),bottomMenuStartX())) ,
+		  "ERROR:initMenu(): win_menu_item_exit create failed\n");
+    EXIT_IF_NONZERO( (wbkgd(menu_items[num_options],COLOR_PAIR(4))) ,
+		     "ERROR:initMenu(): win_menu_item_exit set bkgd failed\n");
+    EXIT_IF_NONZERO( (wprintw(menu_items[num_options]," < Exit >")) ,
+		     "ERROR:initMenu(): win_menu_item_exit wprintw() failed\n");
 
     for(cntr = 0; cntr < num_options;cntr++)
     {
-	items[cntr] = new_panel(menu_items[cntr]);
+	EXIT_IF_NULL( (items[cntr] = new_panel(menu_items[cntr])) ,
+		      "ERROR:initMenu(): panel_menu_item[%d]  failed\n",cntr);
     }
-    items[num_options] = new_panel(menu_items[num_options]);
+    EXIT_IF_NULL( (items[num_options] = new_panel(menu_items[num_options])) ,
+		  "ERROR:initMenu(): panel_menu_item_exit create failed\n");
 
     //hide the panels that exceed window range
     if(num_options > menuBoxHeight())
     {
 	for(cntr = menuBoxHeight(); cntr < num_options; cntr++)
 	{
-	    if((hide_panel(items[cntr])) == ERR)
-            {
-            	mvprintw(debug_pos,0,"ERROR: hide_panel(%d) failed\n",cntr);
-            	debug_pos++;
-	    	refresh();
-	    }
+	    EXIT_IF_NONZERO( (hide_panel(items[cntr])) ,
+			     "ERROR:initMenu(): hiding panel[%d] failed",cntr);
 	} 
     }
-
-    update_panels();
-    doupdate();
 
     return items;
 }
@@ -248,18 +277,26 @@ WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options)
 {
     int cntr;
     WINDOW **items;
-    items = (WINDOW**)malloc(2 * sizeof(WINDOW *));
+
+    EXIT_IF_NULL( (items = (WINDOW**)malloc(2 * sizeof(WINDOW *))) ,
+		  "ERROR:initMenuPopup(): malloc failed");
+
     //setup < yes > box
-    items[0] = subwin(win_menu,1,strlen(menu_options[0]),popupMesgChoiceStartY(),popupMesgChoice1StartX());
-    items[1] = subwin(win_menu,1,strlen(menu_options[1]),popupMesgChoiceStartY(),popupMesgChoice2StartX());
+    EXIT_IF_NULL( (items[0] = subwin(win_menu,1,strlen(menu_options[0])+2,popupMesgChoiceStartY(),popupMesgChoice1StartX())) ,
+		  "ERROR:initMenuPopup(): < Yes > box failed\n");
+    EXIT_IF_NULL( (items[1] = subwin(win_menu,1,strlen(menu_options[1])+2,popupMesgChoiceStartY(),popupMesgChoice2StartX())) ,
+		  "ERROR:initMenuPopup(): < No > box failed\n");
 
     for(cntr = 0; cntr < 2; cntr++)
     {
-	wbkgd(items[cntr],COLOR_PAIR(4));
-	wprintw(items[cntr],"%s",menu_options[cntr]);
+	EXIT_IF_NONZERO( (wbkgd(items[cntr],COLOR_PAIR(4))) ,
+			 "ERROR:initMenuPopup(): set yes/no %d/2 bkgd failed\n",cntr);
+	EXIT_IF_NONZERO( (wprintw(items[cntr]," %s",menu_options[cntr])) ,
+			 "ERROR:initMenuPopup(): set yes/no %d/2 printw() failed\n",cntr);
     }
 
-    wrefresh(win_menu);
+    EXIT_IF_NONZERO( (wrefresh(win_menu)) ,
+		     "ERROR:initMenuPopup(): wrefresh() failed\n");
 
     return items;
 }
@@ -270,7 +307,8 @@ void freeMenuWins(WINDOW ** items, int num_options)
 
     for(cntr = num_options - 1; cntr >= 0; cntr--)
     {
-	delwin(items[cntr]);
+	EXIT_IF_NONZERO( (delwin(items[cntr])) ,
+			 "ERROR:freeMenuWins(): delwin[%d] failed\n",cntr);
     }
 
     free(items);
@@ -278,28 +316,23 @@ void freeMenuWins(WINDOW ** items, int num_options)
 
 void highlight(WINDOW * win,bool high)
 {
-    if(high == true)
-    {
-	wbkgd(win,COLOR_PAIR(1));
-    }
-    else
-    {
-	wbkgd(win,COLOR_PAIR(4));
-    }
+    EXIT_IF_NONZERO( (wbkgd(win,COLOR_PAIR( (high) ? 1 : 4 ))) ,
+		     "ERROR:highlight(): highlight toggle failed\n");
 }
 
-int mainMenu(char ** menu_options,int num_options)
+int mainMenu(char * title,char ** menu_options,int num_options)
 {
     if(!menu_options)
     {
-        printf("mainmenu: inputted char** is null\n");
-        return -1;
+	endwin();
+        fprintf(stderr,"ERROR:mainMenu(): inputted char** is null\n");
+        exit(-1);
     }
 
+
     int c, choice, selected, offset, range[2];
-    WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP], *panel_menu_wins[num_options + 1];
-    PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP], **panel_menu;
-    WINDOW ** items_popup;
+    WINDOW *win_main[WIN_NUM_MAIN], *win_popup[WIN_NUM_POPUP], *panel_menu_wins[num_options + 1], ** items_popup;
+    PANEL *panel_main[WIN_NUM_MAIN], *panel_popup[WIN_NUM_POPUP], **panel_menu, *panel_title;
     char *popup_options[2];
     bool in_menu;
 
@@ -307,32 +340,55 @@ int mainMenu(char ** menu_options,int num_options)
     popup_options[1] = "< No >";
 
     //initialize curses
-    initscr();
-    start_color();
+    EXIT_IF_NULL( (initscr()) ,
+		  "ERROR:mainMenu(): initscr() failed\n");
+
+    //make sure terminal is big enough to support the menu
+    EXIT_IF_NONZERO( (COLS < (WIDTH + 2)) ,
+		     "ERROR: Terminal window is not wide enough to display the menu\n");
+    EXIT_IF_NONZERO( (LINES < (HEIGHT + 2)) ,
+		     "ERROR: Terminal window is not tall enough to display the menu\n");
+
+    //continue to initialize base settings
+    EXIT_IF_NONZERO( (start_color()) ,
+		     "ERROR:mainMenu(): start_color() failed\n");
     cbreak();
     noecho();
-    curs_set(0);
+    if( (curs_set(0)) == ERR) 
+    {
+	endwin();
+	fprintf(stderr,"ERROR:mainMenu(): curs_set() failed\n");
+	exit(-1);
+    }
     keypad(stdscr, true);
 
     //initialize color pairs
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_BLACK, COLOR_BLACK);
-    init_pair(3, COLOR_WHITE, COLOR_WHITE);
-    init_pair(4, COLOR_BLACK, COLOR_CYAN);
+    EXIT_IF_NONZERO( (init_pair(1, COLOR_WHITE, COLOR_BLUE)) ,
+		     "ERROR:mainMenu(): init_pair(1) failed\n");
+    EXIT_IF_NONZERO( (init_pair(2, COLOR_BLACK, COLOR_BLACK)) ,
+		     "ERROR:mainMenu(): init_pair(2) failed\n");
+    EXIT_IF_NONZERO( (init_pair(3, COLOR_WHITE, COLOR_WHITE)) ,
+		     "ERROR:mainMenu(): init_pair(3) failed\n");
+    EXIT_IF_NONZERO( (init_pair(4, COLOR_BLACK, COLOR_CYAN)) ,
+		     "ERROR:mainMenu(): init_pair(4) failed\n");
 
-    wbkgd(stdscr, COLOR_PAIR(1));
+    EXIT_IF_NONZERO( (wbkgd(stdscr, COLOR_PAIR(1))) ,
+		     "ERROR:mainMenu(): setting main background failed\n");
     refresh();
 
     //create windows
-    if(initWindows(win_main, win_popup))
-    {
-        endwin();
-        printf("mainMenu: Could not initialize main windows.\n");
-        return -2;
-    }
+    initWindows(win_main, win_popup);
 
     //set new windows to panels
     initPanels(panel_main,win_main,WIN_NUM_MAIN);
+
+    EXIT_IF_NULL( (panel_title = new_panel(newwin(1,strlen(title) + 2,menuStartY()-2,((COLS - (strlen(title) + 2)) / 2)))) ,
+		  "ERROR:mainMenu(): main menu title initialization failed\n");
+    EXIT_IF_NONZERO( (wbkgd(panel_window(panel_title),COLOR_PAIR(4))) ,
+		     "ERROR:mainMenu(): main menu title set bkgd failed\n");
+    EXIT_IF_NONZERO( (wprintw(panel_window(panel_title)," %s",title)) ,
+		     "ERROR:mainMenu(): main menu title set text failed\n");
+
     initPanels(panel_popup,win_popup,WIN_NUM_POPUP);
 
     //create main menu
@@ -357,16 +413,6 @@ int mainMenu(char ** menu_options,int num_options)
 
         while(c != ENTER && c != ESCAPE)
 	{
-	//debugging messages
-        if(debug_pos >= LINES)
-        {
-	    for(debug_pos = 0; debug_pos < LINES;debug_pos++)
-	    {
-		mvprintw(debug_pos,0,"                                           ");
-	    }
-	    debug_pos = 0;
-	}
-
             c = getch();
             switch(c)
 	    {
@@ -380,10 +426,12 @@ int mainMenu(char ** menu_options,int num_options)
 		    	else if(selected == range[0])
 		    	{
 			    shiftItems(panel_menu,num_options,true,&offset);
-			    hide_panel(panel_menu[range[1]]);
+			    EXIT_IF_NONZERO( (hide_panel(panel_menu[range[1]])) ,
+					     "ERROR:mainMenu(): hide_panel() on panel_menu[%d] failed\n",range[1]);
 			    highlight(panel_window(panel_menu[selected]),false);
 			    selected--;
-			    show_panel(panel_menu[range[0] - 1]);
+			    EXIT_IF_NONZERO( (show_panel(panel_menu[range[0]-1])) ,
+					     "ERROR:mainMenu(): show_panel() on panel_menu[%d] failed\n",range[0]-1);
 			    range[0]--;
 			    range[1]--;
 			    highlight(panel_window(panel_menu[selected]),true);
@@ -407,10 +455,13 @@ int mainMenu(char ** menu_options,int num_options)
 		        else if(selected == range[1])
 		        {
 			    shiftItems(panel_menu,num_options,false,&offset);
-			    hide_panel(panel_menu[range[0]]);
+			    EXIT_IF_NONZERO( (hide_panel(panel_menu[range[0]])) ,
+					     "ERROR:mainMenu(): hide_panel() on panel_menu[%d] failed\n",range[1]);
 			    highlight(panel_window(panel_menu[selected]),false);
 			    selected++;
 			    show_panel(panel_menu[range[1] + 1]);
+			    EXIT_IF_NONZERO( (show_panel(panel_menu[range[1]+1])) ,
+					     "ERROR:mainMenu(): show_panel() on panel_menu[%d] failed\n",range[1]+1);
 			    range[0]++;
 			    range[1]++;
 			    highlight(panel_window(panel_menu[selected]),true);
@@ -446,7 +497,6 @@ int mainMenu(char ** menu_options,int num_options)
 		    {
         	    	//show popup box
         	    	displayPanelSet(panel_popup,WIN_NUM_POPUP,true);
-        	    	show_panel(panel_menu[num_options]);
         	    	update_panels();
         	    	doupdate();
 
@@ -475,9 +525,11 @@ int mainMenu(char ** menu_options,int num_options)
     freePanels(panel_menu, num_options + 1);
     free(panel_menu);
     freePanels(panel_popup, WIN_NUM_POPUP);
+    freePanels(&panel_title,1);
     freePanels(panel_main, WIN_NUM_MAIN);
     refresh();
-    endwin();
+    EXIT_IF_NONZERO( (endwin()) ,
+		     "ERROR:menuMain(): ncurses did not exit normally\n");
 
     if(in_menu == false || c == ESCAPE)
     {
@@ -492,12 +544,16 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
     int current = 1, c = 0;
     WINDOW * current_win = items[0];
 
-    mvwprintw(mesg_win,0,0," %s , are you sure?",option);
-    wrefresh(mesg_win);
+    EXIT_IF_NONZERO( (mvwprintw(mesg_win,0,0," %s , are you sure?",option)) ,
+		     "ERROR:popupMenu(): printing confirmation message failed\n");
+    EXIT_IF_NONZERO( (wrefresh(mesg_win)) ,
+		     "ERROR:popupMenu(): refreshing confirmation message failed\n");
 
     keypad(menu_win,TRUE);
     highlight(current_win,true);
-    wrefresh(current_win);
+
+    EXIT_IF_NONZERO( (wrefresh(current_win)) ,
+		     "ERROR:popupMenu(): initial current_win refresh failed\n");
 
     while(c != ENTER && c != ESCAPE) 
     {
@@ -508,20 +564,24 @@ int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option)
             {
 		current = 1;
 		highlight(current_win,false);
-		wrefresh(current_win);
+		EXIT_IF_NONZERO( (wrefresh(current_win)) ,
+				 "ERROR:popupMenu(): first key_left current_win refresh failed\n");
                 current_win = items[0];
 		highlight(current_win,true);
-		wrefresh(current_win);
+		EXIT_IF_NONZERO( (wrefresh(current_win)) ,
+				 "ERROR:popupMenu(): second key_left current_win refresh failed\n");
                 break;
             }
             case KEY_RIGHT:
             {
 		current = 0;
 		highlight(current_win,false);
-		wrefresh(current_win);
+		EXIT_IF_NONZERO( (wrefresh(current_win)) ,
+				 "ERROR:popupMenu(): first key_right current_win refresh failed\n");
                 current_win = items[1];
 		highlight(current_win,true);
-		wrefresh(current_win);
+		EXIT_IF_NONZERO( (wrefresh(current_win)) ,
+				 "ERROR:popupMenu(): second key_right current_win refresh failed\n");
                 break;
             }
 	    case ESCAPE:
@@ -544,7 +604,8 @@ void shiftItems(PANEL ** items,int num_items,bool up,int * offset)
 
 	for(cntr = 0; cntr < num_items;cntr++)
 	{
-	    move_panel(items[cntr],((menuStartY()+*offset) + (cntr+1)),menuStartX());
+	    EXIT_IF_NONZERO( (move_panel(items[cntr],((menuStartY()+*offset) + (cntr+1)),menuStartX())) ,
+			     "ERROR:shiftItems(): moving panel[%d] up failed",cntr);
 	}
 	(*offset)++;
     }
@@ -552,7 +613,8 @@ void shiftItems(PANEL ** items,int num_items,bool up,int * offset)
     {
 	for(cntr = 0; cntr < num_items;cntr++)
 	{
-	    move_panel(items[cntr],((menuStartY()+*offset) + (cntr-1)),menuStartX());
+	    EXIT_IF_NONZERO( (move_panel(items[cntr],((menuStartY()+*offset) + (cntr-1)),menuStartX())) ,
+			     "ERROR:shiftItems(): moving panel[%d] up failed",cntr);
 	}
 	(*offset)--;
     }    

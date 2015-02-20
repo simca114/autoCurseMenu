@@ -7,7 +7,6 @@
 
   #include <ncurses.h>
   #include <panel.h>
-  #include <menu.h>
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>

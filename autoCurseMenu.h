@@ -12,6 +12,15 @@
   #include <stdlib.h>
   #include <stdarg.h>
 
+  typedef struct _DISPLAYBOX {
+    WINDOW * window;
+    PANEL * panel;
+    int height;
+    int width;
+    int posY;
+    int posX;
+  } DISPLAYBOX;
+
   //functions to calculate windows
   int startY();
   int startX();
@@ -19,6 +28,7 @@
   int menuBoxWidth();
   int menuStartY();
   int menuStartX();
+  int menuTitleStartY();
   int bottomMenu();
   int bottomMenuWidth();
   int bottomMenuStartX();
@@ -35,23 +45,27 @@
   int popupMesgChoice1StartX();
   int popupMesgChoice2StartX();
 
-  //functions for displaying and removing windows/panels
-  void displayPanelSet(PANEL ** panel, int panel_total, bool show);
-  void initWindows(WINDOW ** win1,WINDOW ** win2);
-  void initPanels(PANEL ** panel,WINDOW ** win, int win_total);
-  void freePanels(PANEL ** panel, int win_total);
-  void refreshAllWindows(WINDOW ** win, int win_total);
-  void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
+  //functions for displaying and removing windows/panels/DISPLAYBOX
+  void displayPanelSet(DISPLAYBOX ** dbox, int dbox_total, bool show);
+  void initDISPLAYBOX(DISPLAYBOX ** menu_set,DISPLAYBOX ** popup_set,DISPLAYBOX ** menu_items,DISPLAYBOX ** popup_items, int total_items);
+  void initWindows(DISPLAYBOX ** dbox1,DISPLAYBOX ** dbox2);
+  void initPanels(DISPLAYBOX ** dbox, int dbox_total);
+  void freePanels(DISPLAYBOX ** dbox, int dbox_total);
+  void freeDISPLAYBOX(DISPLAYBOX ** dbox, int dbox_total);
+  int longestString(char ** array_of_strings, int num_strings);
+  void refreshAllWindows(DISPLAYBOX ** dbox, int dbox_total);
+  void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX);
+  //void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
   //functions for creating and clearing menus
-  PANEL ** initMenu(WINDOW ** menu_items,char ** menu_options,int num_options);
-  WINDOW ** initMenuPopup(WINDOW * win_menu, char ** menu_options);
-  void freeMenuWins(WINDOW ** items, int num_options);
+  void initMenu(DISPLAYBOX ** dbox,char ** menu_options,int num_options);
+  void initMenuPopup(DISPLAYBOX ** dbox,char ** menu_options);
+  void freeMenuWins(DISPLAYBOX ** dbox, int num_options);
 
   //functions for menu interactions
   void highlight(WINDOW * win,bool high);
   int mainMenu(char * title,char ** menu_options,int num_options);
-  int popupMenu(WINDOW * menu_win,WINDOW * mesg_win,WINDOW ** items,char * option);
-  void shiftItems(PANEL ** items,int num_items,bool up,int * offset);
+  int popupMenu(DISPLAYBOX ** dbox_popup, DISPLAYBOX ** dbox_popup_items,char * option);
+  void shiftItems(DISPLAYBOX ** items,bool up);
 
 #endif

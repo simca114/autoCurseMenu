@@ -1,0 +1,88 @@
+REFACTOR 5
+------------------------------
+Implementing new struct DISPLAYBOX
+------------------------------
+
+- Create new struct to store individual WINDOW and corrisponding PANELs,
+  along with dimension info
+- Struct variables
+ + WINDOW* win
+ + PANEL* panel
+ + int height
+ + int width
+ + int startY
+ + int startX
+
+#############
+New Functions
+#############
+
+- int menuTitleStartY()
+- initDISPLAYBOX()
+ + pass in every DISPLAYBOX set that will need to be initialized
+ + pass in total menuitems
+ + set int values to base window calculations
+- freeDISPLAYBOX()
+ + clears allocated WINDOW/PANEL ptrs
+- setDISPLAYBOXparameters()
+ + pass in DISPLAYBOX
+ + pass in integers
+ + set DISPLAYBOX integers to passed in integers
+
+##################
+Affected Functions
+##################
+
+- displayPanelSet()
+ + change name to 'displayWinBoxs()'
+ + change PANEL** arg to DISPLAYBOX**
+ + change 'panel_total' name to 'dbox_total'
+ + replace occurences of previous arguements new ones
+
+- initPanels()
+ + change name to 'initWinBoxs()'
+ + remove PANEL/WINDOW args, replace with single WinBox
+ + change 'win_total' to 'dbox_total'
+ + replace occurences of previous arguements with new ones
+
+- initWindows()
+ + change WINDOW args to DISPLAYBOX args
+ + replace occurences of previous arguements with new ones
+
+- freePanels()
+ + change PANEL arg to DISPLAYBOX
+ + change 'win_total' to 'dbox_total'
+ + replace occurences of previous arguements with new ones
+
+- refreshAllWindows()
+ + change WINDOW arg to DISPLAYBOX
+ + change 'win_total' to 'dbox_total'
+ + replace occurences of previous arguements with new ones
+
+- initMenu()
+ + change return type from PANEL to void
+ + change the arguement WINDOW to DISPLAYBOX
+ + replace occurences of previous arguements with new ones
+
+- initMenuPopup
+ + change return type from WINDOW to void
+ + change WINDOW arg to DISPLAYBOX
+ + replace occurences of previous arguements with new ones
+
+- freeMenuWins()
+ + removed
+
+- mainMenu()
+ + change WINDOW/PANEL vars to DISPLAYBOX
+ + remove offset variable
+ + replace occurences of previous arguements with new ones
+
+- popupMenu()
+ + change WINDOW args to DISPLAYBOX
+ + replace occurences of previous arguements with new ones
+
+- shiftItems()
+ + change name to shiftItemsUp()
+ + change PANEL arg to DISPLAYBOX
+ + remove offset arg
+ + have panel shifts rely on DISPLAYBOX vars than recalculations

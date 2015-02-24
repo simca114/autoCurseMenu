@@ -143,10 +143,15 @@ int popupMesgChoice2StartX()
     return (popupStartX() + popupMesgWidth() - popupMesgChoiceWidth() - 2);
 }
 
+int newPosX(int width)
+{
+    return ((COLS - width) / 2);
+}
+
 void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length)
 {
     dbox->width = new_length+2;
-    dbox->posX  = ((COLS - dbox->width) / 2);
+    dbox->posX  = newPosX(dbox->width);
 }
 
 void growDISPLAYBOX(DISPLAYBOX ** dbox,int new_length,int num_items)
@@ -156,8 +161,17 @@ void growDISPLAYBOX(DISPLAYBOX ** dbox,int new_length,int num_items)
     for(cntr = 0; cntr < num_items; cntr++)
     {
         dbox->width = new_length+2;
-        dbox->posX  = ((COLS - dbox->width) / 2);
+        dbox->posX  = newPosX(dbox->width);
     }
+}
+
+void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length)
+{
+    mbox->mainbox.width = new_length+6;
+    mbox->mainbox.posX  = newPosX(mbox->mainbox.width);
+
+    mbox->dropshadow.width = mbox->mainbox.width;
+    mbox->mainbox.posX  = mbox->mainbox.posX+2;
 }
 
 int longestString(char ** array_of_strings, int num_strings)

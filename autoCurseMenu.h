@@ -54,6 +54,11 @@
   int popupMesgChoice1StartX();
   int popupMesgChoice2StartX();
 
+  //functions to calculate length of inputs and adjust window sizes if necessary
+  void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length);
+  void growDISPLAYBOX(DISPLAYBOX ** dbox,int new_length,int num_items);
+  int longestString(char ** array_of_strings, int num_strings);
+
   //functions for displaying and removing windows/panels/DISPLAYBOX
   void attachMENUBOXpanels(MENUBOX * mbox);
   int attachPANEL(DISPLAYBOX * dbox);
@@ -63,7 +68,6 @@
   int freeDISPLAYBOX(DISPLAYBOX * dbox);
   int freePANEL(PANEL * panel);
   int freeWINDOW(WINDOW * window);
-  int longestString(char ** array_of_strings, int num_strings);
   void refreshAllWindows(DISPLAYBOX ** dbox, int dbox_total);
   void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX);
   //void setColorScheme(WINDOW ** win, int first_pair, int second_pair);

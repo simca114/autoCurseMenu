@@ -143,6 +143,38 @@ int popupMesgChoice2StartX()
     return (popupStartX() + popupMesgWidth() - popupMesgChoiceWidth() - 2);
 }
 
+void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length)
+{
+    dbox->width = new_length+2;
+    dbox->posX  = ((COLS - dbox->width) / 2);
+}
+
+void growDISPLAYBOX(DISPLAYBOX ** dbox,int new_length,int num_items)
+{
+    int cntr;
+
+    for(cntr = 0; cntr < num_items; cntr++)
+    {
+        dbox->width = new_length+2;
+        dbox->posX  = ((COLS - dbox->width) / 2);
+    }
+}
+
+int longestString(char ** array_of_strings, int num_strings)
+{
+    int cntr, longest = 0;
+
+    for(cntr = 0; cntr < num_strings; cntr++)
+    {
+        if(strlen(array_of_strings[cntr]) > longest)
+        {
+            longest = strlen(array_of_strings[cntr]);
+        }
+    }
+
+    return longest;
+}
+
 int displayDISPLAYBOX(DISPLAYBOX * dbox, bool show)
 {
     return (HIDE_SHOW(dbox->panel,show));
@@ -343,9 +375,9 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
                          "ERROR:drawItemContent(): mbox_main items[%d] wrefresh() failed\n",cntr);
     }
     EXIT_IF_NONZERO( (wprintw(mbox_main->items[mbox_main->num_items].window," < Exit >")) ,
-                     "ERROR:drawItemContent(): mbox_main exit wprintw() failed\n");
+                     "ERROR:drawItemContent(): mbox_main exit items[%d] wprintw() failed\n",mbox_main->num_items);
     EXIT_IF_NONZERO( (wrefresh(mbox_main->items[mbox_main->num_items].window)) ,
-                     "ERROR:drawItemContent(): mbox_main exit wrefresh() failed\n",cntr);
+                     "ERROR:drawItemContent(): mbox_main exit items[%d] wrefresh() failed\n",cntr);
 
     //hide the panels that exceed window range (NOTE: this part should be moved elsewhere)
     if(mbox_main->num_items > menuBoxHeight())
@@ -361,11 +393,11 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
     EXIT_IF_NONZERO( (wprintw(mbox_popup->items[0].window," < Yes >")) ,
                      "ERROR:drawItemContent(): mbox_popup Yes wprintw() failed\n");
     EXIT_IF_NONZERO( (wrefresh(mbox_popup->items[0].window)) ,
-                     "ERROR:drawItemContent(): mbox_popup Yes wrefresh() failed\n",cntr);
+                     "ERROR:drawItemContent(): mbox_popup Yes wrefresh() failed\n");
     EXIT_IF_NONZERO( (wprintw(mbox_popup->items[1].window," < No >")) ,
                      "ERROR:drawItemContent(): mbox_popup No wprintw() failed\n");
     EXIT_IF_NONZERO( (wrefresh(mbox_popup->items[1].window)) ,
-                     "ERROR:drawItemContent(): mbox_popup No wrefresh() failed\n",cntr);
+                     "ERROR:drawItemContent(): mbox_popup No wrefresh() failed\n");
 }
 
 void highlight(WINDOW * win,bool high)
@@ -384,8 +416,13 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     }
 
     MENUBOX mbox_main, mbox_popup;
-    int c, choice, selected, range[2];
+    int c, choice, selected, range[2], longest_item_length;
     bool in_menu;
+
+    longest_item_length = longestString(menu_options,num_options);
+
+    //TODO this function implementation needs to be redesigned
+    void compareAndResizeMENUBOXs(&mbox_main,&mbox_popup,strlen(title),longest_item_length);
 
     //initialize curses
     EXIT_IF_NULL( (initscr()) ,
@@ -425,6 +462,8 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     refresh();
 
     initMENUBOX(&mbox_main,&mbox_popup,num_options);
+
+
     drawItemContent(&mbox_main,&mbox_popup,title,menu_options);
 
     choice = selected = 0;

@@ -238,36 +238,41 @@ int displayDISPLAYBOX(DISPLAYBOX * dbox, bool show)
     return (HIDE_SHOW(dbox->panel,show));
 }
 
-void attachMENUBOXpanels(MENUBOX * mbox)
+void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX)
 {
-    int cntr;
-
-    EXIT_IF_NONZERO( (attachPANEL(&mbox->dropshadow)) ,
-                     "ERROR:attachMENUBOXpanels(): dropshadow failed\n");
-    EXIT_IF_NONZERO( (attachPANEL(&mbox->mainbox)) ,
-                     "ERROR:attachMENUBOXpanels(): mainbox failed\n");
-    EXIT_IF_NONZERO( (attachPANEL(&mbox->titlebox)) ,
-                     "ERROR:attachMENUBOXpanels(): titlebox failed\n");
-
-    for(cntr = 0; cntr < mbox->num_items;cntr++)
-    {
-        EXIT_IF_NONZERO( (attachPANEL(&mbox->items[cntr])) ,
-                         "ERROR:attachMENUBOXpanels(): items[%d] failed\n",cntr);
-    }
+    dbox->height = height;
+    dbox->width  = width;
+    dbox->posY   = posY;
+    dbox->posX   = posX;
 }
 
-int attachPANEL(DISPLAYBOX * dbox)
+void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items)
 {
-    dbox->panel = new_panel(dbox->window);
+    int cntr,offset;
 
-    if(!dbox->panel)
+    setDISPLAYBOXparams(&mbox_main->dropshadow,HEIGHT,WIDTH,startY()+1,startX()+2);
+    setDISPLAYBOXparams(&mbox_main->mainbox,HEIGHT,WIDTH,startY(),startX());
+    setDISPLAYBOXparams(&mbox_main->titlebox,1,menuBoxWidth(),startY()+1,menuStartX());
+    mbox_main->items = malloc((num_items+1)*sizeof(DISPLAYBOX));
+    for(cntr = 0; cntr < num_items;cntr++)
     {
-        return 1;
+        if(cntr < menuBoxHeight())
+        {
+            offset = cntr;
+        }
+        setDISPLAYBOXparams(&mbox_main->items[cntr],1,menuBoxWidth(),menuStartY()+offset,menuStartX());
     }
-    else
-    {
-        return 0;
-    }
+    setDISPLAYBOXparams(&mbox_main->items[cntr],1,bottomMenuWidth()+1,bottomMenuStartY(),bottomMenuStartX());
+
+    mbox_main->num_items = num_items+1;
+
+    setDISPLAYBOXparams(&mbox_popup->dropshadow,popupHeight(),popupWidth(),popupStartY()+1,popupStartX()+2);
+    setDISPLAYBOXparams(&mbox_popup->mainbox,popupHeight(),popupWidth(),popupStartY(),popupStartX());
+    setDISPLAYBOXparams(&mbox_popup->titlebox,1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
+    mbox_popup->items = malloc(2*sizeof(DISPLAYBOX));
+    setDISPLAYBOXparams(&mbox_popup->items[0],1,9,popupMesgChoiceStartY(),popupMesgChoice1StartX());
+    setDISPLAYBOXparams(&mbox_popup->items[1],1,8,popupMesgChoiceStartY(),popupMesgChoice2StartX());
+    mbox_popup->num_items = 2;
 }
 
 void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup)
@@ -277,24 +282,6 @@ void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup)
 
     drawMENUBOXwindows(mbox_popup);
     attachMENUBOXpanels(mbox_popup);
-}
-
-void displayMENUBOX(MENUBOX * mbox, bool display)
-{
-    int cntr;
-
-    EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->dropshadow,display)) ,
-                     "ERROR:displayMENUBOX: toggling dropshadow failed\n");
-    EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->mainbox,display)) ,
-                     "ERROR:displayMENUBOX: toggling mainbox failed\n");
-    EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->titlebox,display)) ,
-                     "ERROR:displayMENUBOX: toggling titlebox failed\n");
-
-    for(cntr = 0; cntr < mbox->num_items;cntr++)
-    {
-        EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->items[cntr],display)) ,
-                     "ERROR:displayMENUBOX: toggling items[%d] failed\n",cntr);
-    }
 }
 
 void drawMENUBOXwindows(MENUBOX * mbox)
@@ -338,80 +325,54 @@ int drawWINDOW(DISPLAYBOX * dbox,int color)
     }
 }
 
-void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items)
-{
-    int cntr,offset;
-
-    setDISPLAYBOXparams(&mbox_main->dropshadow,HEIGHT,WIDTH,startY()+1,startX()+2);
-    setDISPLAYBOXparams(&mbox_main->mainbox,HEIGHT,WIDTH,startY(),startX());
-    setDISPLAYBOXparams(&mbox_main->titlebox,1,menuBoxWidth(),startY()+1,menuStartX());
-    mbox_main->items = malloc((num_items+1)*sizeof(DISPLAYBOX));
-    for(cntr = 0; cntr < num_items;cntr++)
-    {
-        if(cntr < menuBoxHeight())
-        {
-            offset = cntr;
-        }
-        setDISPLAYBOXparams(&mbox_main->items[cntr],1,menuBoxWidth(),menuStartY()+offset,menuStartX());
-    }
-    setDISPLAYBOXparams(&mbox_main->items[cntr],1,bottomMenuWidth()+1,bottomMenuStartY(),bottomMenuStartX());
-
-    mbox_main->num_items = num_items+1;
-
-    setDISPLAYBOXparams(&mbox_popup->dropshadow,popupHeight(),popupWidth(),popupStartY()+1,popupStartX()+2);
-    setDISPLAYBOXparams(&mbox_popup->mainbox,popupHeight(),popupWidth(),popupStartY(),popupStartX());
-    setDISPLAYBOXparams(&mbox_popup->titlebox,1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
-    mbox_popup->items = malloc(2*sizeof(DISPLAYBOX));
-    setDISPLAYBOXparams(&mbox_popup->items[0],1,9,popupMesgChoiceStartY(),popupMesgChoice1StartX());
-    setDISPLAYBOXparams(&mbox_popup->items[1],1,8,popupMesgChoiceStartY(),popupMesgChoice2StartX());
-    mbox_popup->num_items = 2;
-}
-
-void freeMENUBOX(MENUBOX * mbox)
+void attachMENUBOXpanels(MENUBOX * mbox)
 {
     int cntr;
 
-    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--)
+    EXIT_IF_NONZERO( (attachPANEL(&mbox->dropshadow)) ,
+                     "ERROR:attachMENUBOXpanels(): dropshadow failed\n");
+    EXIT_IF_NONZERO( (attachPANEL(&mbox->mainbox)) ,
+                     "ERROR:attachMENUBOXpanels(): mainbox failed\n");
+    EXIT_IF_NONZERO( (attachPANEL(&mbox->titlebox)) ,
+                     "ERROR:attachMENUBOXpanels(): titlebox failed\n");
+
+    for(cntr = 0; cntr < mbox->num_items;cntr++)
     {
-        EXIT_IF_NONZERO( (freeWINDOW(mbox->items[cntr].window)) ,
-                         "couldnt delete win\n");
+        EXIT_IF_NONZERO( (attachPANEL(&mbox->items[cntr])) ,
+                         "ERROR:attachMENUBOXpanels(): items[%d] failed\n",cntr);
     }
-    EXIT_IF_NONZERO( (freeWINDOW(mbox->titlebox.window)) ,
-                     "ERROR:freeMENUBOX(): titlebox failed\n");
-    EXIT_IF_NONZERO( (freeWINDOW(mbox->mainbox.window)) ,
-                     "ERROR:freeMENUBOX(): mainbox failed\n");
-    EXIT_IF_NONZERO( (freeWINDOW(mbox->dropshadow.window)) ,
-                     "ERROR:freeMENUBOX(): dropshadow failed\n");
+}
 
-    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--)
+int attachPANEL(DISPLAYBOX * dbox)
+{
+    dbox->panel = new_panel(dbox->window);
+
+    if(!dbox->panel)
     {
-        EXIT_IF_NONZERO( (freePANEL(mbox->items[cntr].panel)) ,
-                         "couldnt delete win\n");
+        return 1;
     }
-    EXIT_IF_NONZERO( (freePANEL(mbox->titlebox.panel)) ,
-                     "ERROR:freeMENUBOX(): titlebox panel failed\n");
-    EXIT_IF_NONZERO( (freePANEL(mbox->mainbox.panel)) ,
-                     "ERROR:freeMENUBOX(): mainbox panel failed\n");
-    EXIT_IF_NONZERO( (freePANEL(mbox->dropshadow.panel)) ,
-                     "ERROR:freeMENUBOX(): dropshadow panel failed\n");
+    else
+    {
+        return 0;
+    }
 }
 
-int freePANEL(PANEL * panel)
+void displayMENUBOX(MENUBOX * mbox, bool display)
 {
-    return (del_panel(panel));
-}
+    int cntr;
 
-int freeWINDOW(WINDOW * window)
-{
-    return (delwin(window));
-}
+    EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->dropshadow,display)) ,
+                     "ERROR:displayMENUBOX: toggling dropshadow failed\n");
+    EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->mainbox,display)) ,
+                     "ERROR:displayMENUBOX: toggling mainbox failed\n");
+    EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->titlebox,display)) ,
+                     "ERROR:displayMENUBOX: toggling titlebox failed\n");
 
-void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX)
-{
-    dbox->height = height;
-    dbox->width  = width;
-    dbox->posY   = posY;
-    dbox->posX   = posX;
+    for(cntr = 0; cntr < mbox->num_items;cntr++)
+    {
+        EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->items[cntr],display)) ,
+                     "ERROR:displayMENUBOX: toggling items[%d] failed\n",cntr);
+    }
 }
 
 /*
@@ -457,6 +418,45 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
                      "ERROR:drawItemContent(): mbox_popup < No > wprintw() failed\n");
     EXIT_IF_NONZERO( (wrefresh(mbox_popup->items[1].window)) ,
                      "ERROR:drawItemContent(): mbox_popup < No > wrefresh() failed\n");
+}
+
+void freeMENUBOX(MENUBOX * mbox)
+{
+    int cntr;
+
+    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--)
+    {
+        EXIT_IF_NONZERO( (freeWINDOW(mbox->items[cntr].window)) ,
+                         "couldnt delete win\n");
+    }
+    EXIT_IF_NONZERO( (freeWINDOW(mbox->titlebox.window)) ,
+                     "ERROR:freeMENUBOX(): titlebox failed\n");
+    EXIT_IF_NONZERO( (freeWINDOW(mbox->mainbox.window)) ,
+                     "ERROR:freeMENUBOX(): mainbox failed\n");
+    EXIT_IF_NONZERO( (freeWINDOW(mbox->dropshadow.window)) ,
+                     "ERROR:freeMENUBOX(): dropshadow failed\n");
+
+    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--)
+    {
+        EXIT_IF_NONZERO( (freePANEL(mbox->items[cntr].panel)) ,
+                         "couldnt delete win\n");
+    }
+    EXIT_IF_NONZERO( (freePANEL(mbox->titlebox.panel)) ,
+                     "ERROR:freeMENUBOX(): titlebox panel failed\n");
+    EXIT_IF_NONZERO( (freePANEL(mbox->mainbox.panel)) ,
+                     "ERROR:freeMENUBOX(): mainbox panel failed\n");
+    EXIT_IF_NONZERO( (freePANEL(mbox->dropshadow.panel)) ,
+                     "ERROR:freeMENUBOX(): dropshadow panel failed\n");
+}
+
+int freePANEL(PANEL * panel)
+{
+    return (del_panel(panel));
+}
+
+int freeWINDOW(WINDOW * window)
+{
+    return (delwin(window));
 }
 
 void highlight(WINDOW * win,bool high)

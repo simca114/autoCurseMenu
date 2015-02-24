@@ -24,7 +24,7 @@ int main()
                         "Choice16",
                      };
 
-    choice = mainMenu("Make a Selection",sample,16);
+    choice = mainMenu("Testing`",sample,16);
 
     system("clear");
 

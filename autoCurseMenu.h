@@ -57,7 +57,7 @@
   //functions to calculate length of inputs and adjust window sizes if necessary
   int newPosX(int width);
   void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length);
-  void growDISPLAYBOX(DISPLAYBOX ** dbox,int new_length,int num_items);
+  void growDISPLAYBOXset(DISPLAYBOX ** dbox,int new_length,int num_items);
   void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length);
   int longestString(char ** array_of_strings, int num_strings);
 
@@ -67,7 +67,6 @@
   void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup);
   int displayDISPLAYBOX(DISPLAYBOX * dbox, bool show);
   void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char ** menu_options);
-  int freeDISPLAYBOX(DISPLAYBOX * dbox);
   int freePANEL(PANEL * panel);
   int freeWINDOW(WINDOW * window);
   void refreshAllWindows(DISPLAYBOX ** dbox, int dbox_total);

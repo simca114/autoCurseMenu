@@ -85,6 +85,6 @@
   void highlight(WINDOW * win,bool high);
   int mainMenu(char * title,char ** menu_options,int num_options);
   int popupMenu(MENUBOX * mbox,char * option);
-  void shiftItems(DISPLAYBOX ** items,bool up);
+  void shiftItems(MENUBOX * mbox,int range[],bool up);
 
 #endif

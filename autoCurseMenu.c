@@ -565,7 +565,7 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                         }
                         else if(selected == range[0])
                         {
-                            shiftItems(&mbox_main.items,true);
+                            shiftItems(&mbox_main,range,true);
                             EXIT_IF_NONZERO( (hide_panel(mbox_main.items[range[1]].panel)) ,
                                              "ERROR:mainMenu(): hide_panel() on dbox_menu_items[%d] failed\n",range[1]);
                             highlight(mbox_main.items[selected].window,false);
@@ -594,7 +594,7 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                         }
                         else if(selected == range[1])
                         {
-                            shiftItems(&mbox_main.items,false);
+                            shiftItems(&mbox_main,range,false);
                             EXIT_IF_NONZERO( (hide_panel(mbox_main.items[range[0]].panel)) ,
                                              "ERROR:mainMenu(): hide_panel() on panel_menu[%d] failed\n",range[1]);
                             highlight(mbox_main.items[selected].window,false);
@@ -731,28 +731,28 @@ int popupMenu(MENUBOX * mbox,char * option)
     return current;
 }
 
-void shiftItems(DISPLAYBOX ** items,bool up)
+//void shiftItems(DISPLAYBOX ** items,int range[],bool up)
+void shiftItems(MENUBOX * mbox,int range[],bool up)
 {
+    mvprintw(debug,0,"range[0]:%d,range[1]:%d",range[0],range[1]);
+    debug++;
+    refresh();
     int cntr;
     if(up)
     {
-        for(cntr = 0; items[cntr]->posY != menuStartY();cntr++);
-
-        for(cntr = 0; cntr < (menuStartY() + menuBoxHeight() +1);cntr++)
+        for(cntr = range[0]-1; cntr < range[1];cntr++)
         {
-            setDISPLAYBOXparams(items[cntr],items[cntr]->height,items[cntr]->width,(items[cntr]->posY-1),(items[cntr]->posX));
-            EXIT_IF_NONZERO( (move_panel(items[cntr]->panel,items[cntr]->posY,items[cntr]->posX)) ,
+            setDISPLAYBOXparams(&mbox->items[cntr],mbox->items[cntr].height,mbox->items[cntr].width,(mbox->items[cntr].posY+1),(mbox->items[cntr].posX));
+            EXIT_IF_NONZERO( (move_panel(mbox->items[cntr].panel,mbox->items[cntr].posY,mbox->items[cntr].posX)) ,
                              "ERROR:shiftItems(): moving panel[%d] up failed\n",cntr);
         }
     }
     else
     {
-        for(cntr = 0; items[cntr]->posY != menuStartY();cntr++);
-
-        for(cntr = 0; cntr < (menuStartY() + menuBoxHeight());cntr++)
+        for(cntr = range[0]; cntr <= range[1];cntr++)
         {
-            setDISPLAYBOXparams(items[cntr],items[cntr]->height,items[cntr]->width,(items[cntr]->posY+1),(items[cntr]->posX));
-            EXIT_IF_NONZERO( (move_panel(items[cntr]->panel,items[cntr]->posY,items[cntr]->posX)) ,
+            setDISPLAYBOXparams(&mbox->items[cntr],mbox->items[cntr].height,mbox->items[cntr].width,(mbox->items[cntr].posY-1),(mbox->items[cntr].posX));
+            EXIT_IF_NONZERO( (move_panel(mbox->items[cntr].panel,mbox->items[cntr].posY,mbox->items[cntr].posX)) ,
                              "ERROR:shiftItems(): moving panel[%d] up failed\n",cntr);
         }
     }

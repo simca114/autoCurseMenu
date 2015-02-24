@@ -58,7 +58,8 @@
   int newPosX(int width);
   void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title_len, int longest_item_len);
   void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length);
-  void growDISPLAYBOXset(DISPLAYBOX ** dbox,int new_length,int num_items);
+  void growDISPLAYBOXset(MENUBOX * mbox,int new_length,int num_items);
+  //void growDISPLAYBOXset(DISPLAYBOX ** dbox,int new_length,int num_items);
   void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length);
   int longestString(char ** array_of_strings, int num_strings);
 

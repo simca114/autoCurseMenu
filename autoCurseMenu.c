@@ -183,7 +183,7 @@ void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title
     debug++;
     refresh();
         new_length = longest_item_len;
-        growDISPLAYBOXset(&mbox_main->items,new_length,mbox_main->num_items);
+        growDISPLAYBOXset(mbox_main,new_length,mbox_main->num_items);
         option = 1;
     }
 
@@ -206,14 +206,15 @@ void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length)
     dbox->posX  = newPosX(dbox->width);
 }
 
-void growDISPLAYBOXset(DISPLAYBOX ** dbox,int new_length,int num_items)
+//void growDISPLAYBOXset(DISPLAYBOX ** dbox,int new_length,int num_items)
+void growDISPLAYBOXset(MENUBOX * mbox,int new_length,int num_items)
 {
     int cntr;
 
-    for(cntr = 0; cntr < num_items; cntr++)
+    for(cntr = 0; cntr < num_items-1; cntr++)
     {
-        dbox[cntr]->width = new_length+2;
-        dbox[cntr]->posX  = newPosX(dbox[cntr]->width);
+        mbox->items[cntr].width = new_length+2;
+        mbox->items[cntr].posX  = newPosX(mbox->items[cntr].width);
     }
 }
 

@@ -15,8 +15,6 @@
 
 #define HIDE_SHOW(PAN,h_s) (h_s ? show_panel(PAN) : hide_panel(PAN))
 
-int debug = 0;
-
 #define EXIT_IF_NULL(var,...) do {  \
   if(!var)                          \
   {                                 \
@@ -145,6 +143,11 @@ int popupMesgChoice2StartX()
     return (popupStartX() + popupMesgWidth() - popupMesgChoiceWidth() - 2);
 }
 
+int mesgWindowCenter(int win_width,int mesg_len)
+{
+    return ((win_width - mesg_len) /2);
+}
+
 int newPosX(int width)
 {
     return ((COLS - width) / 2);
@@ -154,14 +157,8 @@ void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title
 {
     int new_length, title, option;
 
-    mvprintw(debug,0,"inside comp func");
-    debug++;
-    refresh();
     if((longest_item_len+14) > mbox_popup->titlebox.width)
     {
-    mvprintw(debug,0,"popup title box too small");
-    debug++;
-    refresh();
         new_length = longest_item_len+16;
         growMENUBOXmainAndShadow(mbox_popup,new_length);
         growDISPLAYBOX(&mbox_popup->titlebox,new_length);
@@ -170,18 +167,12 @@ void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title
     title = option = 0;
     if(title_len > mbox_main->titlebox.width)
     {
-    mvprintw(debug,0,"main title box too small");
-    debug++;
-    refresh();
         new_length = title_len;
         growDISPLAYBOX(&mbox_main->titlebox,new_length);
         title = 1;
     }
     if(longest_item_len > mbox_main->items[0].width)
     {
-    mvprintw(debug,0,"main menu box too small");
-    debug++;
-    refresh();
         new_length = longest_item_len;
         growDISPLAYBOXset(mbox_main,new_length,mbox_main->num_items);
         option = 1;
@@ -431,7 +422,7 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
 {
     int cntr;
 
-    EXIT_IF_NONZERO( (wprintw(mbox_main->titlebox.window," %s",title)) ,
+    EXIT_IF_NONZERO( (mvwprintw(mbox_main->titlebox.window,0,mesgWindowCenter(mbox_main->titlebox.width,strlen(title)),"%s",title)) ,
                      "ERROR:drawItemContent(): mbox_main title wprintw() failed\n");
     EXIT_IF_NONZERO( (wrefresh(mbox_main->titlebox.window)) ,
                      "ERROR:drawItemContent(): mbox_main title wrefresh() failed\n");
@@ -457,7 +448,6 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
                              "ERROR:drawItemContent(): hiding mbox_main dbox[%d] panel failed",cntr);
         }
     }
-
 
     EXIT_IF_NONZERO( (wprintw(mbox_popup->items[0].window," < Yes >")) ,
                      "ERROR:drawItemContent(): mbox_popup Yes wprintw() failed\n");
@@ -533,9 +523,6 @@ int mainMenu(char * title,char ** menu_options,int num_options)
 
 
     createMENUBOX(&mbox_main,&mbox_popup);
-    mvprintw(debug,0,"post drawMENUBOXwindows()");
-    debug++;
-    refresh();
     drawItemContent(&mbox_main,&mbox_popup,title,menu_options);
 
     choice = selected = 0;
@@ -680,7 +667,9 @@ int popupMenu(MENUBOX * mbox,char * option)
     int current = 1, c = 0;
     WINDOW * current_win = mbox->items[0].window;
 
-    EXIT_IF_NONZERO( (mvwprintw(mbox->titlebox.window,0,0," %s , are you sure?",option)) ,
+    EXIT_IF_NONZERO( (werase(mbox->titlebox.window)) ,
+                     "ERROR:popupMenu(): clearing popup message failed\n");
+    EXIT_IF_NONZERO( (mvwprintw(mbox->titlebox.window,0,mesgWindowCenter(mbox->titlebox.width,strlen(option)+16),"%s , are you sure?",option)) ,
                      "ERROR:popupMenu(): printing confirmation message failed\n");
     EXIT_IF_NONZERO( (wrefresh(mbox->titlebox.window)) ,
                      "ERROR:popupMenu(): refreshing confirmation message failed\n");
@@ -735,9 +724,6 @@ int popupMenu(MENUBOX * mbox,char * option)
 //void shiftItems(DISPLAYBOX ** items,int range[],bool up)
 void shiftItems(MENUBOX * mbox,int range[],bool up)
 {
-    mvprintw(debug,0,"range[0]:%d,range[1]:%d",range[0],range[1]);
-    debug++;
-    refresh();
     int cntr;
     if(up)
     {

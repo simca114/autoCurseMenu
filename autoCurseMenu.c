@@ -7,9 +7,6 @@
 #define ENTER 10
 #define ESCAPE 27
 
-#define DBOX_NUM_MAIN 3
-#define DBOX_NUM_POPUP 3
-
 #define HEIGHT 20
 #define WIDTH 40
 
@@ -491,11 +488,6 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     EXIT_IF_NULL( (initscr()) ,
                   "ERROR:mainMenu(): initscr() failed\n");
 
-    //make sure terminal is big enough to support the menu
-    EXIT_IF_NONZERO( (COLS < (WIDTH + 2)) ,
-                     "ERROR: Terminal window is not wide enough to display the menu\n");
-    EXIT_IF_NONZERO( (LINES < (HEIGHT + 2)) ,
-                     "ERROR: Terminal window is not tall enough to display the menu\n");
 
     //continue to initialize base settings
     EXIT_IF_NONZERO( (start_color()) ,
@@ -528,6 +520,11 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     //TODO this function implementation needs to be redesigned
     compareAndResizeMENUBOXs(&mbox_main,&mbox_popup,strlen(title),longest_item_length);
 
+    //make sure terminal is big enough to support the menu
+    EXIT_IF_NONZERO( (COLS < mbox_main.mainbox.width+2 || COLS < mbox_popup.mainbox.width+2) ,
+                     "ERROR: Terminal window is not wide enough to display the menu\n");
+    EXIT_IF_NONZERO( (LINES < mbox_main.mainbox.height+1 || LINES < mbox_popup.mainbox.height+1) ,
+                     "ERROR: Terminal window is not tall enough to display the menu\n");
 
     createMENUBOX(&mbox_main,&mbox_popup);
     drawItemContent(&mbox_main,&mbox_popup,title,menu_options);

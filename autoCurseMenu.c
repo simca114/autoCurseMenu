@@ -383,6 +383,8 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
 {
     int cntr;
 
+    EXIT_IF_NONZERO( (box(mbox_main->mainbox.window,0,0)) ,
+                     "ERROR:drawItemContent(): mbox_main mainbox box() failed");
     EXIT_IF_NONZERO( (mvwprintw(mbox_main->titlebox.window,0,mesgWindowCenter(mbox_main->titlebox.width,strlen(title)),"%s",title)) ,
                      "ERROR:drawItemContent(): mbox_main title wprintw() failed\n");
     EXIT_IF_NONZERO( (wrefresh(mbox_main->titlebox.window)) ,
@@ -409,6 +411,11 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
                              "ERROR:drawItemContent(): hiding mbox_main dbox[%d] panel failed",cntr);
         }
     }
+
+    //wattron(mbox_popup->mainbox.window,COLOR_PAIR(5));
+    EXIT_IF_NONZERO( (box(mbox_popup->mainbox.window,0,0)) ,
+                     "ERROR:drawItemContent(): mbox_main mainbox box() failed");
+    //wattroff(mbox_popup->mainbox.window,COLOR_PAIR(5));
 
     EXIT_IF_NONZERO( (wprintw(mbox_popup->items[0].window," < Yes >")) ,
                      "ERROR:drawItemContent(): mbox_popup Yes wprintw() failed\n");
@@ -508,7 +515,7 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                      "ERROR:mainMenu(): init_pair(1) failed\n");
     EXIT_IF_NONZERO( (init_pair(2, COLOR_BLACK, COLOR_BLACK)) ,
                      "ERROR:mainMenu(): init_pair(2) failed\n");
-    EXIT_IF_NONZERO( (init_pair(3, COLOR_WHITE, COLOR_WHITE)) ,
+    EXIT_IF_NONZERO( (init_pair(3, COLOR_BLACK, COLOR_WHITE)) ,
                      "ERROR:mainMenu(): init_pair(3) failed\n");
     EXIT_IF_NONZERO( (init_pair(4, COLOR_BLACK, COLOR_CYAN)) ,
                      "ERROR:mainMenu(): init_pair(4) failed\n");

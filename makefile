@@ -8,6 +8,7 @@ autoCM: autoCurseMenu.h autoCurseMenu.c
 	$(CC) $(DEBG) $(MESG) -c autoCurseMenu.c -lpanel -lncurses
 
 libautoCM: autoCM
+	rm libautoCurseMenu.a
 	ar -cvq libautoCurseMenu.a autoCurseMenu.o
 
 test: autoCM test.c

@@ -150,6 +150,56 @@ int newPosX(int width)
     return ((COLS - width) / 2);
 }
 
+void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title_len, int longest_item_len)
+{
+    int new_length, title, option;
+
+    mvprintw(debug,0,"inside comp func");
+    debug++;
+    refresh();
+    if((longest_item_len+14) > mbox_popup->titlebox.width)
+    {
+    mvprintw(debug,0,"popup title box too small");
+    debug++;
+    refresh();
+        new_length = longest_item_len+16;
+        growMENUBOXmainAndShadow(mbox_popup,new_length);
+        growDISPLAYBOX(&mbox_popup->titlebox,new_length);
+    }
+
+    title = option = 0;
+    if(title_len > mbox_main->titlebox.width)
+    {
+    mvprintw(debug,0,"main title box too small");
+    debug++;
+    refresh();
+        new_length = title_len;
+        growDISPLAYBOX(&mbox_main->titlebox,new_length);
+        title = 1;
+    }
+    if(longest_item_len > mbox_main->items[0].width)
+    {
+    mvprintw(debug,0,"main menu box too small");
+    debug++;
+    refresh();
+        new_length = longest_item_len;
+        growDISPLAYBOXset(&mbox_main->items,new_length,mbox_main->num_items);
+        option = 1;
+    }
+
+    if(title || option)
+    {
+        if(title && option)
+        {
+            if(title_len > longest_item_len)
+            {
+                new_length = title_len;
+            }
+        }
+        growMENUBOXmainAndShadow(mbox_main,new_length);
+    }
+}
+
 void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length)
 {
     dbox->width = new_length+2;
@@ -173,7 +223,7 @@ void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length)
     mbox->mainbox.posX  = newPosX(mbox->mainbox.width);
 
     mbox->dropshadow.width = mbox->mainbox.width;
-    mbox->mainbox.posX  = mbox->mainbox.posX+2;
+    mbox->dropshadow.posX = mbox->mainbox.posX+2;
 }
 
 int longestString(char ** array_of_strings, int num_strings)
@@ -325,22 +375,6 @@ void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items)
     mbox_popup->num_items = 2;
 }
 
-int freeDISPLAYBOX(DISPLAYBOX * dbox)
-{
-    int error;
-    error = freeWINDOW(dbox->window);
-    error = freePANEL(dbox->panel);
-
-    if(error)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
 void freeMENUBOX(MENUBOX * mbox)
 {
     int cntr;
@@ -455,9 +489,6 @@ int mainMenu(char * title,char ** menu_options,int num_options)
 
     longest_item_length = longestString(menu_options,num_options);
 
-    //TODO this function implementation needs to be redesigned
-//    void compareAndResizeMENUBOXs(&mbox_main,&mbox_popup,strlen(title),longest_item_length);
-
     //initialize curses
     EXIT_IF_NULL( (initscr()) ,
                   "ERROR:mainMenu(): initscr() failed\n");
@@ -496,6 +527,9 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     refresh();
 
     initMENUBOX(&mbox_main,&mbox_popup,num_options);
+    //TODO this function implementation needs to be redesigned
+    compareAndResizeMENUBOXs(&mbox_main,&mbox_popup,strlen(title),longest_item_length);
+
 
     createMENUBOX(&mbox_main,&mbox_popup);
     mvprintw(debug,0,"post drawMENUBOXwindows()");

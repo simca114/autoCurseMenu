@@ -445,6 +445,7 @@ void freeMENUBOX(MENUBOX * mbox)
         EXIT_IF_NONZERO( (freePANEL(mbox->items[cntr].panel)) ,
                          "couldnt delete win\n");
     }
+    free(mbox->items);
     EXIT_IF_NONZERO( (freePANEL(mbox->titlebox.panel)) ,
                      "ERROR:freeMENUBOX(): titlebox panel failed\n");
     EXIT_IF_NONZERO( (freePANEL(mbox->mainbox.panel)) ,
@@ -471,6 +472,8 @@ void highlight(WINDOW * win,bool high)
 
 int mainMenu(char * title,char ** menu_options,int num_options)
 {
+    signal(SIGSEGV,handle_sigsegv);
+
     if(!menu_options)
     {
         endwin();
@@ -487,7 +490,7 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     //initialize curses
     EXIT_IF_NULL( (initscr()) ,
                   "ERROR:mainMenu(): initscr() failed\n");
-
+//    main = newterm(getenv("TERM"), stdout, stdin);
 
     //continue to initialize base settings
     EXIT_IF_NONZERO( (start_color()) ,
@@ -654,10 +657,12 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     freeMENUBOX(&mbox_popup);
     freeMENUBOX(&mbox_main);
 
+    keypad(stdscr,false);
     refresh();
+
     EXIT_IF_NONZERO( (endwin()) ,
                      "ERROR:menuMain(): ncurses did not exit normally\n");
-
+    //delscreen(main);
     if(in_menu == false || c == ESCAPE)
     {
         selected = -1;
@@ -747,4 +752,12 @@ void shiftItems(MENUBOX * mbox,int range[],bool up)
                              "ERROR:shiftItems(): moving panel[%d] up failed\n",cntr);
         }
     }
+}
+
+void handle_sigsegv(int sig)
+{
+    endwin();
+    system("clear");
+    printf("Segmentation Fault\n");
+    exit(-1);
 }

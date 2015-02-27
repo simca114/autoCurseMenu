@@ -1,0 +1,94 @@
+REFACTOR 6
+------------------------------
+Moving menu items into struct of respective menus
+------------------------------
+
+- create new struct called MENUBOX
+- MENUBOX vars
+ + DISPLAYBOX dropshadow
+ + DISPLAYBOX mainbox
+ + DISPLAYBOX titlebox
+ + DISPLAYBOX ** items
+ + int num_items
+
+#############
+New Functions
+#############
+
+- attachMENUBOXpanels()
+ + takes in MENUBOX*
+ + sends each DISPLAYBOX in MENUBOX to attachPANEL()
+- attachPANEL()
+ + takes in DISPLAYBOX*
+ + attaches WINDOW* to PANEL*
+ + returns 1 if newpanel failed, 0 otherwise
+- createMENUBOX()
+ + takes in two MENUBOX*
+ + sends both MENUBOX* to drawMENUBOXwindows() and attachMENUBOXpanels()
+- displayMENUBOX()
+ + takes in MENUBOX* and bool
+ + calls displayDISPLAYBOX for each DISPLAYBOX in MENUBOX and passes along the bool
+- drawItemContent()
+ + args: MENUBOX*,MENUBOX*,char*,char**
+ + populates item content for both menus
+- drawMENUBOXwindows()
+ + takes in MENUBOX*
+ + sends each DISPLAYBOX in MENUBOX to drawWINDOW()
+- drawWINDOW()
+ + takes in DISPLAYBOX* and int
+ + draws WINDOW* for DISPLAYBOX* from DISPLAYBOX* params
+ + sets background color of WINDOW to COLOR_PAIR(int)
+ + returns 1 if newwin failed, 0 otherwise
+- freeMENUBOX()
+ + args: MENUBOX
+ + sends each DISPLAYBOX into freeDISPLAYBOX()
+- freeWINDOW()
+ + args: WINDOW*
+ + sends WINDOW into delwin()
+ + returns value of delwin()
+- initMENUBOX()
+ + takes in two MENUBOX*
+ + sets up base values for all DISPLAYBOX*
+
+
+##################
+Affected Functions
+##################
+
+- displayPanelSet()
+ + name change to displayDISPLAYBOX
+ + new args: DISPLAYBOX*,bool
+ + show/hide panel of DISPLAYBOX depending on bool
+ + change return type to int
+ + return value of hide/show_panel
+- initDISPLAYBOX()
+ + depricated, functionality moved into initMENUBOX()
+- initPANELS()
+ + depricated, functionality moved into drawMENUBOXpanels()
+- initWindow()
+ + depricated, functionality moved to drawMENUBOXwindows()
+- freeDISPLAYBOX()
+ + old args: DISPLAYBOX**,int
+ + new args: DISPLABBOX*
+ + sends dbox->window to freeWINDOW()
+ + sends dbox->panel to freePANEL()
+ + returns one if either fail, 0 otherwise
+- freePanels()
+ + new name: freePANEL()
+ + old args: DISPLAYBOX**,int
+ + new args: PANEL*
+ + runs del_panel() with inputted PANEL
+ + returns value of del_panel()
+- initMenu()
+ + depricated, functionality moved into drawItemContent()
+- initMenuPopup()
+ + depricated, functionality moved into drawItemContent()
+- menuMain()
+ + replace DISPLAYBOX with MENUBOX's
+ + updated all occurences of previous vars to reflect new changes
+- popupMenu()
+ + old args: DISPLAYBOX**,DISPLAYBOX**,char*
+ + new args: MENUBOX*,char*
+ + replaces DISPLAYBOX instances with approriate MENUBOX
+- refreshAllWindows()
+ + removed

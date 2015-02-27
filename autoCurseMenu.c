@@ -30,157 +30,126 @@
   }                                   \
 }while(0)
 
-int startY()
-{
+int startY() {
     return ((LINES - HEIGHT) / 2);
 }
 
-int startX()
-{
+int startX() {
     return ((COLS - WIDTH) / 2);
 }
 
-int menuBoxHeight()
-{
+int menuBoxHeight() {
     return (HEIGHT - 6);
 }
 
-int menuBoxWidth()
-{
+int menuBoxWidth() {
     return (WIDTH - 4);
 }
 
-int menuStartY()
-{
+int menuStartY() {
     return ((LINES - menuBoxHeight()) / 2);
 }
 
-int menuStartX()
-{
+int menuStartX() {
     return ((COLS - menuBoxWidth()) / 2);
 }
 
-int menuTitleStartY()
-{
+int menuTitleStartY() {
     return (startY() + 2);
 }
 
-int bottomMenu()
-{
+int bottomMenu() {
     return (menuStartY() + menuBoxHeight());
 }
 
-int bottomMenuWidth()
-{
+int bottomMenuWidth() {
     return (menuBoxWidth() / 4);
 }
 
-int bottomMenuStartX()
-{
+int bottomMenuStartX() {
     return ((COLS - bottomMenuWidth()) / 2);
 }
 
-int bottomMenuStartY()
-{
+int bottomMenuStartY() {
     return (bottomMenu() + 1);
 }
 
-int popupHeight()
-{
+int popupHeight() {
     return (HEIGHT / 4);
 }
 
-int popupWidth()
-{
+int popupWidth() {
     return (WIDTH - 8);
 }
 
-int popupStartY()
-{
+int popupStartY() {
     return ((LINES - popupHeight()) / 2);
 }
 
-int popupStartX()
-{
+int popupStartX() {
     return ((COLS - popupWidth()) / 2);
 }
 
-int popupMesgWidth()
-{
+int popupMesgWidth() {
     return (popupWidth() - 4);
 }
 
-int popupMesgStartY()
-{
+int popupMesgStartY() {
     return (popupStartY() + 1);
 }
 
-int popupMesgStartX()
-{
+int popupMesgStartX() {
     return (popupStartX() + 2);
 }
 
-int popupMesgChoiceWidth()
-{
+int popupMesgChoiceWidth() {
     return (popupWidth() / 4);
 }
 
-int popupMesgChoiceStartY()
-{
+int popupMesgChoiceStartY() {
     return (popupStartY() + popupHeight() - 2);
 }
 
-int popupMesgChoice1StartX()
-{
+int popupMesgChoice1StartX() {
     return (popupStartX() + 6);
 }
 
-int popupMesgChoice2StartX()
-{
+int popupMesgChoice2StartX() {
     return (popupStartX() + popupMesgWidth() - popupMesgChoiceWidth() - 2);
 }
 
-int mesgWindowCenter(int win_width,int mesg_len)
-{
+int mesgWindowCenter(int win_width,int mesg_len) {
     return ((win_width - mesg_len) /2);
 }
 
-int newPosX(int width)
-{
+int newPosX(int width) {
     return ((COLS - width) / 2);
 }
 
-void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title_len, int longest_item_len)
-{
+void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title_len, int longest_item_len) {
     int new_length, title, option;
 
-    if((longest_item_len+14) > mbox_popup->titlebox.width)
-    {
+    if((longest_item_len+14) > mbox_popup->titlebox.width) {
         new_length = longest_item_len+16;
         growMENUBOXmainAndShadow(mbox_popup,new_length);
         growDISPLAYBOX(&mbox_popup->titlebox,new_length);
     }
 
     title = option = 0;
-    if(title_len > mbox_main->titlebox.width)
-    {
+    if(title_len > mbox_main->titlebox.width) {
         new_length = title_len;
         growDISPLAYBOX(&mbox_main->titlebox,new_length);
         title = 1;
     }
-    if(longest_item_len > mbox_main->items[0].width)
-    {
+    if(longest_item_len > mbox_main->items[0].width) {
         new_length = longest_item_len;
         growDISPLAYBOXset(mbox_main,new_length,mbox_main->num_items);
         option = 1;
     }
 
-    if(title || option)
-    {
-        if(title && option)
-        {
-            if(title_len > longest_item_len)
-            {
+    if(title || option) {
+        if(title && option) {
+            if(title_len > longest_item_len) {
                 new_length = title_len;
             }
         }
@@ -188,26 +157,22 @@ void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title
     }
 }
 
-void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length)
-{
+void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length) {
     dbox->width = new_length+2;
     dbox->posX  = newPosX(dbox->width);
 }
 
 //void growDISPLAYBOXset(DISPLAYBOX ** dbox,int new_length,int num_items)
-void growDISPLAYBOXset(MENUBOX * mbox,int new_length,int num_items)
-{
+void growDISPLAYBOXset(MENUBOX * mbox,int new_length,int num_items) {
     int cntr;
 
-    for(cntr = 0; cntr < num_items-1; cntr++)
-    {
+    for(cntr = 0; cntr < num_items-1; cntr++) {
         mbox->items[cntr].width = new_length+2;
         mbox->items[cntr].posX  = newPosX(mbox->items[cntr].width);
     }
 }
 
-void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length)
-{
+void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length) {
     mbox->mainbox.width = new_length+6;
     mbox->mainbox.posX  = newPosX(mbox->mainbox.width);
 
@@ -215,14 +180,11 @@ void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length)
     mbox->dropshadow.posX = mbox->mainbox.posX+2;
 }
 
-int longestString(char ** array_of_strings, int num_strings)
-{
+int longestString(char ** array_of_strings, int num_strings) {
     int cntr, longest = 0;
 
-    for(cntr = 0; cntr < num_strings; cntr++)
-    {
-        if(strlen(array_of_strings[cntr]) > longest)
-        {
+    for(cntr = 0; cntr < num_strings; cntr++) {
+        if(strlen(array_of_strings[cntr]) > longest) {
             longest = strlen(array_of_strings[cntr]);
         }
     }
@@ -230,31 +192,26 @@ int longestString(char ** array_of_strings, int num_strings)
     return longest;
 }
 
-int displayDISPLAYBOX(DISPLAYBOX * dbox, bool show)
-{
+int displayDISPLAYBOX(DISPLAYBOX * dbox, bool show) {
     return (HIDE_SHOW(dbox->panel,show));
 }
 
-void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX)
-{
+void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX) {
     dbox->height = height;
     dbox->width  = width;
     dbox->posY   = posY;
     dbox->posX   = posX;
 }
 
-void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items)
-{
+void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items) {
     int cntr,offset;
 
     setDISPLAYBOXparams(&mbox_main->dropshadow,HEIGHT,WIDTH,startY()+1,startX()+2);
     setDISPLAYBOXparams(&mbox_main->mainbox,HEIGHT,WIDTH,startY(),startX());
     setDISPLAYBOXparams(&mbox_main->titlebox,1,menuBoxWidth(),startY()+1,menuStartX());
     mbox_main->items = malloc((num_items+1)*sizeof(DISPLAYBOX));
-    for(cntr = 0; cntr < num_items;cntr++)
-    {
-        if(cntr < menuBoxHeight())
-        {
+    for(cntr = 0; cntr < num_items;cntr++) {
+        if(cntr < menuBoxHeight()) {
             offset = cntr;
         }
         setDISPLAYBOXparams(&mbox_main->items[cntr],1,menuBoxWidth(),menuStartY()+offset,menuStartX());
@@ -272,8 +229,7 @@ void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items)
     mbox_popup->num_items = 2;
 }
 
-void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup)
-{
+void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup) {
     drawMENUBOXwindows(mbox_main);
     attachMENUBOXpanels(mbox_main);
 
@@ -281,8 +237,7 @@ void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup)
     attachMENUBOXpanels(mbox_popup);
 }
 
-void drawMENUBOXwindows(MENUBOX * mbox)
-{
+void drawMENUBOXwindows(MENUBOX * mbox) {
     int cntr;
 
     EXIT_IF_NONZERO( (drawWINDOW(&mbox->dropshadow,2)) ,
@@ -292,38 +247,32 @@ void drawMENUBOXwindows(MENUBOX * mbox)
     EXIT_IF_NONZERO( (drawWINDOW(&mbox->titlebox,4)) ,
                      "ERROR:drawMENUBOXwindows(): titlebox failed\n");
 
-    for(cntr = 0; cntr < mbox->num_items;cntr++)
-    {
+    for(cntr = 0; cntr < mbox->num_items;cntr++) {
         EXIT_IF_NONZERO( (drawWINDOW(&mbox->items[cntr],4)) ,
                          "ERROR:drawMENUBOXwindows(): items[%d] failed\n",cntr);
     }
 }
 
-int drawWINDOW(DISPLAYBOX * dbox,int color)
-{
+int drawWINDOW(DISPLAYBOX * dbox,int color) {
     int bkgd_fail;
 
     dbox->window = newwin(dbox->height,dbox->width,dbox->posY,dbox->posX);
 
-    if(dbox->window)
-    {
+    if(dbox->window) {
         bkgd_fail = wbkgd(dbox->window,COLOR_PAIR(color));
     }
 
     wrefresh(dbox->window);
 
-    if(!dbox->window || bkgd_fail)
-    {
+    if(!dbox->window || bkgd_fail) {
         return 1;
     }
-    else
-    {
+    else {
         return 0;
     }
 }
 
-void attachMENUBOXpanels(MENUBOX * mbox)
-{
+void attachMENUBOXpanels(MENUBOX * mbox) {
     int cntr;
 
     EXIT_IF_NONZERO( (attachPANEL(&mbox->dropshadow)) ,
@@ -333,29 +282,24 @@ void attachMENUBOXpanels(MENUBOX * mbox)
     EXIT_IF_NONZERO( (attachPANEL(&mbox->titlebox)) ,
                      "ERROR:attachMENUBOXpanels(): titlebox failed\n");
 
-    for(cntr = 0; cntr < mbox->num_items;cntr++)
-    {
+    for(cntr = 0; cntr < mbox->num_items;cntr++) {
         EXIT_IF_NONZERO( (attachPANEL(&mbox->items[cntr])) ,
                          "ERROR:attachMENUBOXpanels(): items[%d] failed\n",cntr);
     }
 }
 
-int attachPANEL(DISPLAYBOX * dbox)
-{
+int attachPANEL(DISPLAYBOX * dbox) {
     dbox->panel = new_panel(dbox->window);
 
-    if(!dbox->panel)
-    {
+    if(!dbox->panel) {
         return 1;
     }
-    else
-    {
+    else {
         return 0;
     }
 }
 
-void displayMENUBOX(MENUBOX * mbox, bool display)
-{
+void displayMENUBOX(MENUBOX * mbox, bool display) {
     int cntr;
 
     EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->dropshadow,display)) ,
@@ -365,8 +309,7 @@ void displayMENUBOX(MENUBOX * mbox, bool display)
     EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->titlebox,display)) ,
                      "ERROR:displayMENUBOX: toggling titlebox failed\n");
 
-    for(cntr = 0; cntr < mbox->num_items;cntr++)
-    {
+    for(cntr = 0; cntr < mbox->num_items;cntr++) {
         EXIT_IF_NONZERO( (displayDISPLAYBOX(&mbox->items[cntr],display)) ,
                      "ERROR:displayMENUBOX: toggling items[%d] failed\n",cntr);
     }
@@ -376,8 +319,7 @@ void displayMENUBOX(MENUBOX * mbox, bool display)
 void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 */
 
-void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char ** menu_options)
-{
+void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char ** menu_options) {
     int cntr;
 
     EXIT_IF_NONZERO( (box(mbox_main->mainbox.window,0,0)) ,
@@ -387,8 +329,7 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
     EXIT_IF_NONZERO( (wrefresh(mbox_main->titlebox.window)) ,
                      "ERROR:drawItemContent(): mbox_main title wrefresh() failed\n");
     //print content for each main menu item
-    for(cntr = 0; cntr < (mbox_main->num_items-1);cntr++)
-    {
+    for(cntr = 0; cntr < (mbox_main->num_items-1);cntr++) {
         EXIT_IF_NONZERO( (wprintw(mbox_main->items[cntr].window," %s",menu_options[cntr])) ,
                          "ERROR:drawItemContent(): mbox_main items[%d] wprintw() failed\n",cntr);
         EXIT_IF_NONZERO( (wrefresh(mbox_main->items[cntr].window)) ,
@@ -400,10 +341,8 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
                      "ERROR:drawItemContent(): mbox_main exit items[%d] wrefresh() failed\n",cntr);
 
     //hide the panels that exceed window range (NOTE: this part should be moved elsewhere)
-    if(mbox_main->num_items > menuBoxHeight())
-    {
-        for(cntr = menuBoxHeight(); cntr < (mbox_main->num_items-1); cntr++)
-        {
+    if(mbox_main->num_items > menuBoxHeight()) {
+        for(cntr = menuBoxHeight(); cntr < (mbox_main->num_items-1); cntr++) {
             EXIT_IF_NONZERO( (hide_panel(mbox_main->items[cntr].panel)) ,
                              "ERROR:drawItemContent(): hiding mbox_main dbox[%d] panel failed",cntr);
         }
@@ -424,12 +363,10 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
                      "ERROR:drawItemContent(): mbox_popup < No > wrefresh() failed\n");
 }
 
-void freeMENUBOX(MENUBOX * mbox)
-{
+void freeMENUBOX(MENUBOX * mbox) {
     int cntr;
 
-    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--)
-    {
+    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--) {
         EXIT_IF_NONZERO( (freeWINDOW(mbox->items[cntr].window)) ,
                          "couldnt delete win\n");
     }
@@ -440,8 +377,7 @@ void freeMENUBOX(MENUBOX * mbox)
     EXIT_IF_NONZERO( (freeWINDOW(mbox->dropshadow.window)) ,
                      "ERROR:freeMENUBOX(): dropshadow failed\n");
 
-    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--)
-    {
+    for(cntr = (mbox->num_items-1); cntr >= 0; cntr--) {
         EXIT_IF_NONZERO( (freePANEL(mbox->items[cntr].panel)) ,
                          "couldnt delete win\n");
     }
@@ -454,28 +390,23 @@ void freeMENUBOX(MENUBOX * mbox)
                      "ERROR:freeMENUBOX(): dropshadow panel failed\n");
 }
 
-int freePANEL(PANEL * panel)
-{
+int freePANEL(PANEL * panel) {
     return (del_panel(panel));
 }
 
-int freeWINDOW(WINDOW * window)
-{
+int freeWINDOW(WINDOW * window) {
     return (delwin(window));
 }
 
-void highlight(WINDOW * win,bool high)
-{
+void highlight(WINDOW * win,bool high) {
     EXIT_IF_NONZERO( (wbkgd(win,COLOR_PAIR( (high) ? 1 : 4 ))) ,
                      "ERROR:highlight(): highlight toggle failed\n");
 }
 
-int mainMenu(char * title,char ** menu_options,int num_options)
-{
+int mainMenu(char * title,char ** menu_options,int num_options) {
     signal(SIGSEGV,handle_sigsegv);
 
-    if(!menu_options)
-    {
+    if(!menu_options) {
         endwin();
         fprintf(stderr,"ERROR:mainMenu(): inputted char** is null\n");
         exit(-1);
@@ -490,15 +421,13 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     //initialize curses
     EXIT_IF_NULL( (initscr()) ,
                   "ERROR:mainMenu(): initscr() failed\n");
-//    main = newterm(getenv("TERM"), stdout, stdin);
 
     //continue to initialize base settings
     EXIT_IF_NONZERO( (start_color()) ,
                      "ERROR:mainMenu(): start_color() failed\n");
     cbreak();
     noecho();
-    if( (curs_set(0)) == ERR)
-    {
+    if( (curs_set(0)) == ERR) {
         endwin();
         fprintf(stderr,"ERROR:mainMenu(): curs_set() failed\n");
         exit(-1);
@@ -538,28 +467,20 @@ int mainMenu(char * title,char ** menu_options,int num_options)
     highlight(mbox_main.items[0].window,true);
     in_menu = true;
 
-    while(choice != 1)
-    {
+    while(choice != 1) {
         c = 0;
         //hide confirmation box
         displayMENUBOX(&mbox_popup,false);
         update_panels();
         doupdate();
 
-        while(c != ENTER && c != ESCAPE)
-        {
+        while(c != ENTER && c != ESCAPE) {
             c = getch();
-            switch(c)
-            {
-                case KEY_UP:
-                {
-                    if(in_menu == true)
-                    {
-                        if(selected == 0)
-                        {
-                        }
-                        else if(selected == range[0])
-                        {
+            switch(c) {
+                case KEY_UP: {
+                    if(in_menu == true) {
+                        if(selected == 0) {}
+                        else if(selected == range[0]) {
                             shiftItems(&mbox_main,range,true);
                             EXIT_IF_NONZERO( (hide_panel(mbox_main.items[range[1]].panel)) ,
                                              "ERROR:mainMenu(): hide_panel() on dbox_menu_items[%d] failed\n",range[1]);
@@ -571,8 +492,7 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                             range[1]--;
                             highlight(mbox_main.items[selected].window,true);
                         }
-                        else
-                        {
+                        else {
                             highlight(mbox_main.items[selected].window,false);
                             selected--;
                             highlight(mbox_main.items[selected].window,true);
@@ -580,15 +500,10 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                     }
                     break;
                 }
-                case KEY_DOWN:
-                {
-                    if(in_menu == true)
-                    {
-                        if(selected == (num_options - 1))
-                        {
-                        }
-                        else if(selected == range[1])
-                        {
+                case KEY_DOWN: {
+                    if(in_menu == true) {
+                        if(selected == (num_options - 1)) {}
+                        else if(selected == range[1]) {
                             shiftItems(&mbox_main,range,false);
                             EXIT_IF_NONZERO( (hide_panel(mbox_main.items[range[0]].panel)) ,
                                              "ERROR:mainMenu(): hide_panel() on panel_menu[%d] failed\n",range[1]);
@@ -601,8 +516,7 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                             range[1]++;
                             highlight(mbox_main.items[selected].window,true);
                         }
-                        else
-                        {
+                        else {
                             highlight(mbox_main.items[selected].window,false);
                             selected++;
                             highlight(mbox_main.items[selected].window,true);
@@ -610,26 +524,21 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                     }
                     break;
                 }
-                case TAB:
-                {
-                    if(in_menu == true)
-                    {
+                case TAB: {
+                    if(in_menu == true) {
                         highlight(mbox_main.items[selected].window,false);
                         highlight(mbox_main.items[num_options].window,true);
                         in_menu = false;
                     }
-                    else
-                    {
+                    else {
                         highlight(mbox_main.items[selected].window,true);
                         highlight(mbox_main.items[num_options].window,false);
                         in_menu = true;
                     }
                     break;
                 }
-                case ENTER:
-                {
-                    if(in_menu == true)
-                    {
+                case ENTER: {
+                    if(in_menu == true) {
                         //show popup box
                         displayMENUBOX(&mbox_popup,true);
                         update_panels();
@@ -638,13 +547,11 @@ int mainMenu(char * title,char ** menu_options,int num_options)
                         choice = popupMenu(&mbox_popup,menu_options[selected]);
                         break;
                     }
-                    else
-                    {
+                    else {
                         choice = 1;
                     }
                 }
-                case ESCAPE:
-                {
+                case ESCAPE: {
                     choice = 1;
                 }
             }
@@ -662,17 +569,14 @@ int mainMenu(char * title,char ** menu_options,int num_options)
 
     EXIT_IF_NONZERO( (endwin()) ,
                      "ERROR:menuMain(): ncurses did not exit normally\n");
-    //delscreen(main);
-    if(in_menu == false || c == ESCAPE)
-    {
+    if(in_menu == false || c == ESCAPE) {
         selected = -1;
     }
 
     return selected;
 }
 
-int popupMenu(MENUBOX * mbox,char * option)
-{
+int popupMenu(MENUBOX * mbox,char * option) {
     int current = 1, c = 0;
     WINDOW * current_win = mbox->items[0].window;
 
@@ -689,13 +593,10 @@ int popupMenu(MENUBOX * mbox,char * option)
     EXIT_IF_NONZERO( (wrefresh(current_win)) ,
                      "ERROR:popupMenu(): initial current_win refresh failed\n");
 
-    while(c != ENTER && c != ESCAPE) 
-    {
+    while(c != ENTER && c != ESCAPE) {
         c = getch();
-        switch(c)
-        {
-            case KEY_LEFT:
-            {
+        switch(c) {
+            case KEY_LEFT: {
                 current = 1;
                 highlight(current_win,false);
                 EXIT_IF_NONZERO( (wrefresh(current_win)) ,
@@ -706,8 +607,7 @@ int popupMenu(MENUBOX * mbox,char * option)
                                  "ERROR:popupMenu(): second key_left current_win refresh failed\n");
                 break;
             }
-            case KEY_RIGHT:
-            {
+            case KEY_RIGHT: {
                 current = 0;
                 highlight(current_win,false);
                 EXIT_IF_NONZERO( (wrefresh(current_win)) ,
@@ -718,8 +618,7 @@ int popupMenu(MENUBOX * mbox,char * option)
                                  "ERROR:popupMenu(): second key_right current_win refresh failed\n");
                 break;
             }
-            case ESCAPE:
-            {
+            case ESCAPE: {
                 current = 0;
                 break;
             }
@@ -731,22 +630,17 @@ int popupMenu(MENUBOX * mbox,char * option)
 }
 
 //void shiftItems(DISPLAYBOX ** items,int range[],bool up)
-void shiftItems(MENUBOX * mbox,int range[],bool up)
-{
+void shiftItems(MENUBOX * mbox,int range[],bool up) {
     int cntr;
-    if(up)
-    {
-        for(cntr = range[0]-1; cntr < range[1];cntr++)
-        {
+    if(up) {
+        for(cntr = range[0]-1; cntr < range[1];cntr++) {
             setDISPLAYBOXparams(&mbox->items[cntr],mbox->items[cntr].height,mbox->items[cntr].width,(mbox->items[cntr].posY+1),(mbox->items[cntr].posX));
             EXIT_IF_NONZERO( (move_panel(mbox->items[cntr].panel,mbox->items[cntr].posY,mbox->items[cntr].posX)) ,
                              "ERROR:shiftItems(): moving panel[%d] up failed\n",cntr);
         }
     }
-    else
-    {
-        for(cntr = range[0]; cntr <= range[1];cntr++)
-        {
+    else {
+        for(cntr = range[0]; cntr <= range[1];cntr++) {
             setDISPLAYBOXparams(&mbox->items[cntr],mbox->items[cntr].height,mbox->items[cntr].width,(mbox->items[cntr].posY-1),(mbox->items[cntr].posX));
             EXIT_IF_NONZERO( (move_panel(mbox->items[cntr].panel,mbox->items[cntr].posY,mbox->items[cntr].posX)) ,
                              "ERROR:shiftItems(): moving panel[%d] up failed\n",cntr);
@@ -754,8 +648,7 @@ void shiftItems(MENUBOX * mbox,int range[],bool up)
     }
 }
 
-void handle_sigsegv(int sig)
-{
+void handle_sigsegv(int sig) {
     endwin();
     system("clear");
     printf("Segmentation Fault\n");

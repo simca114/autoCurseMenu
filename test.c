@@ -6,7 +6,7 @@ int main()
 {
     int choice;
     char *sample[] = {
-                        "Choice1sssssssssssss",
+                        "Choice1",
                         "Choice2",
                         "Choice3",
                         "Choice4",
@@ -21,24 +21,10 @@ int main()
                         "Choice13",
                         "Choice14",
                         "Choice15",
-                        "Choice16sssssssssssssssssssssssssssss",
+                        "Choice16",
                      };
 
-    choice = mainMenu("Testingsuperlon",sample,16);
-
-    initscr();
-    start_color();
-    noecho();
-    cbreak();
-
-    WINDOW * testwin;
-    refresh();
-    testwin = newwin(10,10,10,10);
-    wbkgd(testwin,COLOR_PAIR(2));
-    wrefresh(testwin);
-    getch();
-    refresh();
-    endwin();
+    choice = mainMenu("Please make a seleciton",sample,16);
 
     system("clear");
 

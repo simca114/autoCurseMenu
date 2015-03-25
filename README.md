@@ -1,14 +1,13 @@
 libAutoCurseMenu
 ================
 
-This is a C library that uses ncurses to generate a intarctive menu. The inputted array of strings will appear as a scrollable menu. When a selection is made, a confirmation window will appear allowing the user to double check their choice.
+This is a C library that uses ncurses to generate a intarctive menu. The inputted array of strings will appear as a scrollable menu. When a selection is made, the function returns the index of the array that was inputted.
 
-Main Menu    |  Confirmation Window
-:-----------:|:---------------------:
-![][mainimg] | ![][confimg]
+Main Menu    |
+:-----------:|
+![][mainimg] |
 
 [mainimg]: https://github.com/simca114/autoCurseMenu/blob/master/libautoCMmain.png "Main Menu"
-[confimg]: https://github.com/simca114/autoCurseMenu/blob/master/libAutoCMconf.png "Confirmation Window"
 
 Requirements
 ------------

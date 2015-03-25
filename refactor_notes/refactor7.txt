@@ -1,0 +1,36 @@
+REFACTOR 7
+----------------------------------
+Removing confirmation box for menu
+----------------------------------
+
+##################
+Affected Functions
+##################
+
+x compareAndResizeMENUBOXs()
+ * removing reference to mbox_popup
+
+x initMENUBOX()
+ * removing reference to mbox_popup
+
+x createMENUBOX()
+ * removing reference to mbox_popup
+
+x drawItemContent()
+ * removing reference to mbox_popup
+
+x mainMenu()
+ * removing reference to mbox_popup
+
+
+#################
+Removed Functions
+#################
+
+- removed HIDE_SHOW macro
+
+- displayDISPLAYBOX()
+ * functionality no longer required
+
+- popupMenu()
+ * functionality no longer required

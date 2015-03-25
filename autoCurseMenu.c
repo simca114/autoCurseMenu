@@ -126,14 +126,8 @@ int newPosX(int width) {
     return ((COLS - width) / 2);
 }
 
-void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title_len, int longest_item_len) {
+void compareAndResizeMENUBOXs(MENUBOX * mbox_main, int title_len, int longest_item_len) {
     int new_length, title, option;
-
-    if((longest_item_len+14) > mbox_popup->titlebox.width) {
-        new_length = longest_item_len+16;
-        growMENUBOXmainAndShadow(mbox_popup,new_length);
-        growDISPLAYBOX(&mbox_popup->titlebox,new_length);
-    }
 
     title = option = 0;
     if(title_len > mbox_main->titlebox.width) {
@@ -203,7 +197,7 @@ void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int 
     dbox->posX   = posX;
 }
 
-void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items) {
+void initMENUBOX(MENUBOX * mbox_main, int num_items) {
     int cntr,offset;
 
     setDISPLAYBOXparams(&mbox_main->dropshadow,HEIGHT,WIDTH,startY()+1,startX()+2);
@@ -220,21 +214,13 @@ void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items) {
 
     mbox_main->num_items = num_items+1;
 
-    setDISPLAYBOXparams(&mbox_popup->dropshadow,popupHeight(),popupWidth(),popupStartY()+1,popupStartX()+2);
-    setDISPLAYBOXparams(&mbox_popup->mainbox,popupHeight(),popupWidth(),popupStartY(),popupStartX());
-    setDISPLAYBOXparams(&mbox_popup->titlebox,1,popupMesgWidth(),popupMesgStartY(),popupMesgStartX());
-    mbox_popup->items = malloc(2*sizeof(DISPLAYBOX));
-    setDISPLAYBOXparams(&mbox_popup->items[0],1,9,popupMesgChoiceStartY(),popupMesgChoice1StartX());
-    setDISPLAYBOXparams(&mbox_popup->items[1],1,8,popupMesgChoiceStartY(),popupMesgChoice2StartX());
-    mbox_popup->num_items = 2;
 }
 
-void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup) {
+void createMENUBOX(MENUBOX * mbox_main) {
+
     drawMENUBOXwindows(mbox_main);
     attachMENUBOXpanels(mbox_main);
 
-    drawMENUBOXwindows(mbox_popup);
-    attachMENUBOXpanels(mbox_popup);
 }
 
 void drawMENUBOXwindows(MENUBOX * mbox) {
@@ -315,11 +301,7 @@ void displayMENUBOX(MENUBOX * mbox, bool display) {
     }
 }
 
-/*
-void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
-*/
-
-void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char ** menu_options) {
+void drawItemContent(MENUBOX * mbox_main, char * title, char ** menu_options) {
     int cntr;
 
     EXIT_IF_NONZERO( (box(mbox_main->mainbox.window,0,0)) ,
@@ -348,19 +330,6 @@ void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char 
         }
     }
 
-    //wattron(mbox_popup->mainbox.window,COLOR_PAIR(5));
-    EXIT_IF_NONZERO( (box(mbox_popup->mainbox.window,0,0)) ,
-                     "ERROR:drawItemContent(): mbox_main mainbox box() failed");
-    //wattroff(mbox_popup->mainbox.window,COLOR_PAIR(5));
-
-    EXIT_IF_NONZERO( (wprintw(mbox_popup->items[0].window," < Yes >")) ,
-                     "ERROR:drawItemContent(): mbox_popup Yes wprintw() failed\n");
-    EXIT_IF_NONZERO( (wrefresh(mbox_popup->items[0].window)) ,
-                     "ERROR:drawItemContent(): mbox_popup Yes wrefresh() failed\n");
-    EXIT_IF_NONZERO( (wprintw(mbox_popup->items[1].window," < No >")) ,
-                     "ERROR:drawItemContent(): mbox_popup < No > wprintw() failed\n");
-    EXIT_IF_NONZERO( (wrefresh(mbox_popup->items[1].window)) ,
-                     "ERROR:drawItemContent(): mbox_popup < No > wrefresh() failed\n");
 }
 
 void freeMENUBOX(MENUBOX * mbox) {
@@ -404,6 +373,7 @@ void highlight(WINDOW * win,bool high) {
 }
 
 int mainMenu(char * title,char ** menu_options,int num_options) {
+
     signal(SIGSEGV,handle_sigsegv);
 
     if(!menu_options) {
@@ -412,7 +382,7 @@ int mainMenu(char * title,char ** menu_options,int num_options) {
         exit(-1);
     }
 
-    MENUBOX mbox_main, mbox_popup;
+    MENUBOX mbox_main;
     int c, choice, selected, range[2], longest_item_length;
     bool in_menu;
 
@@ -448,18 +418,18 @@ int mainMenu(char * title,char ** menu_options,int num_options) {
                      "ERROR:mainMenu(): setting main background failed\n");
     refresh();
 
-    initMENUBOX(&mbox_main,&mbox_popup,num_options);
+    initMENUBOX(&mbox_main,num_options);
     //TODO this function implementation needs to be redesigned
-    compareAndResizeMENUBOXs(&mbox_main,&mbox_popup,strlen(title),longest_item_length);
+    compareAndResizeMENUBOXs(&mbox_main,strlen(title),longest_item_length);
 
     //make sure terminal is big enough to support the menu
-    EXIT_IF_NONZERO( (COLS < mbox_main.mainbox.width+2 || COLS < mbox_popup.mainbox.width+2) ,
+    EXIT_IF_NONZERO( (COLS < mbox_main.mainbox.width+2) ,
                      "ERROR: Terminal window is not wide enough to display the menu\n");
-    EXIT_IF_NONZERO( (LINES < mbox_main.mainbox.height+1 || LINES < mbox_popup.mainbox.height+1) ,
+    EXIT_IF_NONZERO( (LINES < mbox_main.mainbox.height+1) ,
                      "ERROR: Terminal window is not tall enough to display the menu\n");
 
-    createMENUBOX(&mbox_main,&mbox_popup);
-    drawItemContent(&mbox_main,&mbox_popup,title,menu_options);
+    createMENUBOX(&mbox_main);
+    drawItemContent(&mbox_main,title,menu_options);
 
     choice = selected = 0;
     range[0] = 0;
@@ -467,12 +437,11 @@ int mainMenu(char * title,char ** menu_options,int num_options) {
     highlight(mbox_main.items[0].window,true);
     in_menu = true;
 
+    update_panels();
+    doupdate();
+
     while(choice != 1) {
         c = 0;
-        //hide confirmation box
-        displayMENUBOX(&mbox_popup,false);
-        update_panels();
-        doupdate();
 
         while(c != ENTER && c != ESCAPE) {
             c = getch();
@@ -539,12 +508,8 @@ int mainMenu(char * title,char ** menu_options,int num_options) {
                 }
                 case ENTER: {
                     if(in_menu == true) {
-                        //show popup box
-                        displayMENUBOX(&mbox_popup,true);
-                        update_panels();
-                        doupdate();
 
-                        choice = popupMenu(&mbox_popup,menu_options[selected]);
+                        choice = 1;
                         break;
                     }
                     else {
@@ -561,7 +526,6 @@ int mainMenu(char * title,char ** menu_options,int num_options) {
 
     }
 
-    freeMENUBOX(&mbox_popup);
     freeMENUBOX(&mbox_main);
 
     keypad(stdscr,false);
@@ -574,59 +538,6 @@ int mainMenu(char * title,char ** menu_options,int num_options) {
     }
 
     return selected;
-}
-
-int popupMenu(MENUBOX * mbox,char * option) {
-    int current = 1, c = 0;
-    WINDOW * current_win = mbox->items[0].window;
-
-    EXIT_IF_NONZERO( (werase(mbox->titlebox.window)) ,
-                     "ERROR:popupMenu(): clearing popup message failed\n");
-    EXIT_IF_NONZERO( (mvwprintw(mbox->titlebox.window,0,mesgWindowCenter(mbox->titlebox.width,strlen(option)+16),"%s , are you sure?",option)) ,
-                     "ERROR:popupMenu(): printing confirmation message failed\n");
-    EXIT_IF_NONZERO( (wrefresh(mbox->titlebox.window)) ,
-                     "ERROR:popupMenu(): refreshing confirmation message failed\n");
-
-    //keypad(mwindow,TRUE);
-    highlight(current_win,true);
-
-    EXIT_IF_NONZERO( (wrefresh(current_win)) ,
-                     "ERROR:popupMenu(): initial current_win refresh failed\n");
-
-    while(c != ENTER && c != ESCAPE) {
-        c = getch();
-        switch(c) {
-            case KEY_LEFT: {
-                current = 1;
-                highlight(current_win,false);
-                EXIT_IF_NONZERO( (wrefresh(current_win)) ,
-                                 "ERROR:popupMenu(): first key_left current_win refresh failed\n");
-                current_win = mbox->items[0].window;
-                highlight(current_win,true);
-                EXIT_IF_NONZERO( (wrefresh(current_win)) ,
-                                 "ERROR:popupMenu(): second key_left current_win refresh failed\n");
-                break;
-            }
-            case KEY_RIGHT: {
-                current = 0;
-                highlight(current_win,false);
-                EXIT_IF_NONZERO( (wrefresh(current_win)) ,
-                                 "ERROR:popupMenu(): first key_right current_win refresh failed\n");
-                current_win = mbox->items[1].window;
-                highlight(current_win,true);
-                EXIT_IF_NONZERO( (wrefresh(current_win)) ,
-                                 "ERROR:popupMenu(): second key_right current_win refresh failed\n");
-                break;
-            }
-            case ESCAPE: {
-                current = 0;
-                break;
-            }
-        }
-    }
-    highlight(current_win,false);
-
-    return current;
 }
 
 //void shiftItems(DISPLAYBOX ** items,int range[],bool up)

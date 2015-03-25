@@ -59,7 +59,7 @@
   //functions to calculate length of inputs and adjust window sizes if necessary
   int mesgWindowCenter(int win_width,int mesg_len);
   int newPosX(int width);
-  void compareAndResizeMENUBOXs(MENUBOX * mbox_main,MENUBOX * mbox_popup,int title_len, int longest_item_len);
+  void compareAndResizeMENUBOXs(MENUBOX * mbox_main, int title_len, int longest_item_len);
   void growDISPLAYBOX(DISPLAYBOX * dbox,int new_length);
   void growDISPLAYBOXset(MENUBOX * mbox,int new_length,int num_items);
   void growMENUBOXmainAndShadow(MENUBOX * mbox,int new_length);
@@ -68,15 +68,15 @@
   //functions for displaying and removing windows/panels/DISPLAYBOX
   void setDISPLAYBOXparams(DISPLAYBOX * dbox,int height, int width, int posY, int posX);
   int displayDISPLAYBOX(DISPLAYBOX * dbox, bool show);
-  void drawItemContent(MENUBOX * mbox_main,MENUBOX * mbox_popup,char * title,char ** menu_options);
+  void drawItemContent(MENUBOX * mbox_main,char * title,char ** menu_options);
   int freePANEL(PANEL * panel);
   int freeWINDOW(WINDOW * window);
   //void setColorScheme(WINDOW ** win, int first_pair, int second_pair);
 
   //functions for creating and clearing menus
   void displayMENUBOX(MENUBOX * mbox, bool display);
-  void initMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup,int num_items);
-  void createMENUBOX(MENUBOX * mbox_main, MENUBOX * mbox_popup);
+  void initMENUBOX(MENUBOX * mbox_main, int num_items);
+  void createMENUBOX(MENUBOX * mbox_main);
   void drawMENUBOXwindows(MENUBOX * mbox);
   int drawWINDOW(DISPLAYBOX * dbox,int color);
   void attachMENUBOXpanels(MENUBOX * mbox);
@@ -86,7 +86,6 @@
   //functions for menu interactions
   void highlight(WINDOW * win,bool high);
   int mainMenu(char * title,char ** menu_options,int num_options);
-  int popupMenu(MENUBOX * mbox,char * option);
   void shiftItems(MENUBOX * mbox,int range[],bool up);
 
 #endif
